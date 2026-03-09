@@ -20,13 +20,316 @@ import {
   MOCK_UPCOMING_ACTIVITIES,
 } from "./mockPortalData";
 
+const ONBOARDING_CONVERSATION = {
+  id: "conv-onboarding",
+  teamId: MOCK_TEAMS[0].id,
+  title: "Começar agora",
+  preview: "Escolha um atalho para começar.",
+  updatedLabel: "Agora",
+  unread: 0,
+};
+
+function normalizeMessage(value = "") {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function buildConversationTitle(message) {
+  const normalized = normalizeMessage(message);
+
+  if (normalized === "fiquei sentado o dia todo hoje") {
+    return "Muito tempo sentado";
+  }
+
+  if (normalized === "sinto dores na lombar") {
+    return "Lombar pedindo atenção";
+  }
+
+  if (normalized === "quero meditar") {
+    return "Começar a meditar";
+  }
+
+  return message.length > 34 ? `${message.slice(0, 31)}...` : message;
+}
+
 function buildCoachReply(content, context = {}) {
-  const lower = content.toLowerCase();
+  const normalized = normalizeMessage(content);
   const topHabit = context.teamHabits?.[0];
   const topTask = context.teamTasks?.[0];
   const activityCount = context.teamActivities?.length ?? 0;
 
-  if (lower.includes("visão geral") || lower.includes("visao geral")) {
+  if (normalized === "fiquei sentado o dia todo hoje") {
+    return {
+      content:
+        "Eu começaria com um **reset de 8 minutos**: 5 minutos de caminhada leve e 3 minutos de mobilidade simples para quadril e lombar.\n\n**Por quê:** depois de muito tempo sentado, o ganho mais rápido vem de trocar de posição e reacender circulação antes de pensar em intensidade.",
+      followUpQuestions: [
+        "Tenho só 5 minutos agora",
+        "Prefiro fazer isso em casa",
+        "Quero algo sem impacto",
+      ],
+      suggestedActions: [
+        {
+          label: "Criar hábito de pausa pós-trabalho",
+          message: "Criar hábito de pausa pós-trabalho.",
+        },
+        {
+          label: "Criar tarefa de mobilidade para hoje",
+          message: "Criar tarefa de mobilidade para hoje.",
+        },
+      ],
+    };
+  }
+
+  if (normalized === "sinto dores na lombar") {
+    return {
+      content:
+        "Eu evitaria começar com algo agressivo. Melhor testar um **bloco curto de mobilidade suave com caminhada leve** e observar se o corpo solta.\n\n**Por quê:** quando a lombar reclama, consistência leve costuma responder melhor do que um esforço grande logo de cara.\n\nSe a dor estiver forte, irradiando ou com formigamento, isso já pede avaliação profissional.",
+      followUpQuestions: [
+        "A dor piora quando fico sentado",
+        "Quero uma versão em pé",
+        "Tenho medo de forçar demais",
+      ],
+      suggestedActions: [
+        {
+          label: "Criar rotina leve para a lombar",
+          message: "Criar rotina leve para a lombar.",
+        },
+        {
+          label: "Criar check-in de mobilidade para hoje",
+          message: "Criar check-in de mobilidade para hoje.",
+        },
+      ],
+    };
+  }
+
+  if (normalized === "quero meditar") {
+    return {
+      content:
+        "Eu começaria com **5 minutos por dia**, preso a um gatilho fixo como depois do café ou antes de dormir.\n\n**Por quê:** meditação entra melhor quando o horário já existe e a meta é pequena o suficiente para caber até em dia ruim.",
+      followUpQuestions: [
+        "Quero meditar de manhã",
+        "Prefiro meditar à noite",
+        "Quero algo guiado",
+      ],
+      suggestedActions: [
+        {
+          label: "Criar hábito de meditação",
+          message: "Criar hábito de meditação de 5 minutos.",
+        },
+        {
+          label: "Criar sessão de meditação para hoje",
+          message: "Criar tarefa de meditação para hoje.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("5 minutos agora")) {
+    return {
+      content:
+        "Então eu reduziria o plano para **3 minutos andando + 2 minutos de mobilidade**. É curto o bastante para caber agora e já quebra o ciclo de ficar parado.",
+      suggestedActions: [
+        {
+          label: "Criar tarefa de 5 minutos",
+          message: "Criar tarefa de 5 minutos para hoje.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("fazer isso em casa")) {
+    return {
+      content:
+        "Em casa eu faria uma sequência sem equipamento: marcha parada, rotação leve de tronco e alongamento de quadril.\n\nO objetivo é aliviar rigidez sem depender de sair.",
+      suggestedActions: [
+        {
+          label: "Criar rotina em casa",
+          message: "Criar rotina de mobilidade em casa.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("sem impacto")) {
+    return {
+      content:
+        "Sem impacto, eu manteria tudo em pé e controlado: caminhada leve no lugar, mobilidade de quadril e respiração profunda.\n\nIsso já reduz a sensação de travamento sem sacudir a lombar.",
+      suggestedActions: [
+        {
+          label: "Criar versão sem impacto",
+          message: "Criar versão sem impacto para hoje.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("piora quando fico sentado")) {
+    return {
+      content:
+        "Nesse caso eu trataria a posição sentada como gatilho. A melhor aposta é uma **pausa curta e frequente**, não uma sessão longa isolada.\n\nAlgo como 2 minutos de levantar, andar e alongar já tende a ajudar mais.",
+      suggestedActions: [
+        {
+          label: "Criar hábito de pausa curta",
+          message: "Criar hábito de pausa curta para a lombar.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("versao em pe")) {
+    return {
+      content:
+        "Em pé, eu manteria uma sequência simples: inclinação pélvica suave, rotação de ombros e caminhada leve de 2 a 3 minutos.\n\nA ideia é soltar sem pedir amplitude demais.",
+      suggestedActions: [
+        {
+          label: "Criar rotina em pé",
+          message: "Criar rotina em pé para a lombar.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("forcar demais")) {
+    return {
+      content:
+        "Então a regra é esta: terminar melhor do que começou. Se o bloco for leve o suficiente para te deixar mais solto, ele está no ponto certo.",
+      suggestedActions: [
+        {
+          label: "Criar check-in leve",
+          message: "Criar check-in leve para a lombar.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("meditar de manha")) {
+    return {
+      content:
+        "De manhã eu prenderia isso ao café ou ao primeiro copo d'água. O melhor cenário é não abrir o dia negociando demais.",
+      suggestedActions: [
+        {
+          label: "Criar hábito matinal",
+          message: "Criar hábito matinal de meditação.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("meditar a noite")) {
+    return {
+      content:
+        "À noite eu faria o contrário: 5 minutos antes de deitar, com luz baixa e sem tela no meio. Isso ajuda a rotina a puxar o hábito.",
+      suggestedActions: [
+        {
+          label: "Criar hábito noturno",
+          message: "Criar hábito noturno de meditação.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("guiado")) {
+    return {
+      content:
+        "Guiado é uma boa porta de entrada porque reduz a fricção de decidir o que fazer. Eu começaria com uma sessão curta, sempre do mesmo tipo.",
+      suggestedActions: [
+        {
+          label: "Criar sessão guiada",
+          message: "Criar sessão guiada de meditação para hoje.",
+        },
+      ],
+    };
+  }
+
+  if (normalized.includes("pausa pos-trabalho")) {
+    return {
+      content:
+        "Fechado. Criei um **hábito curto de pausa pós-trabalho** para transformar o fim do dia em gatilho de movimento.\n\nA ideia é deixar a consistência mais fácil do que depender de vontade.",
+    };
+  }
+
+  if (normalized.includes("mobilidade para hoje")) {
+    return {
+      content:
+        "Perfeito. Organizei uma **tarefa de mobilidade para hoje** com um bloco curto e objetivo.\n\nEla já aparece como próximo passo para você executar sem pensar muito.",
+    };
+  }
+
+  if (normalized.includes("rotina leve para a lombar")) {
+    return {
+      content:
+        "Fechado. Criei uma **rotina leve para a lombar** com foco em consistência e movimento suave.\n\nO objetivo é te deixar melhor no final do bloco, não mais cansado.",
+    };
+  }
+
+  if (normalized.includes("check-in de mobilidade") || normalized.includes("check-in leve")) {
+    return {
+      content:
+        "Pronto. Montei um **check-in curto de mobilidade** para hoje.\n\nEle serve mais para medir resposta do corpo do que para puxar performance.",
+    };
+  }
+
+  if (
+    normalized.includes("meditacao de 5 minutos") ||
+    normalized.includes("habito matinal de meditacao") ||
+    normalized.includes("habito noturno de meditacao")
+  ) {
+    return {
+      content:
+        "Fechado. Criei um **hábito diário de meditação de 5 minutos**.\n\nCurto o bastante para caber na rotina e estável o bastante para virar base.",
+    };
+  }
+
+  if (
+    normalized.includes("meditacao para hoje") ||
+    normalized.includes("sessao guiada de meditacao") ||
+    normalized.includes("sessao guiada")
+  ) {
+    return {
+      content:
+        "Perfeito. Deixei uma **sessão curta de meditação para hoje** pronta como próximo passo.\n\nA ideia é começar simples e sem abrir espaço para negociação.",
+    };
+  }
+
+  if (normalized.includes("rotina de mobilidade em casa")) {
+    return {
+      content:
+        "Fechado. Criei uma **rotina de mobilidade em casa** para você usar sem depender de sair.\n\nIsso reduz atrito e aumenta a chance de repetir amanhã também.",
+    };
+  }
+
+  if (normalized.includes("versao sem impacto")) {
+    return {
+      content:
+        "Pronto. Organizei uma **versão sem impacto para hoje**.\n\nEla mantém o corpo em movimento sem adicionar carga desnecessária.",
+    };
+  }
+
+  if (normalized.includes("habito de pausa curta")) {
+    return {
+      content:
+        "Fechado. Criei um **hábito de pausa curta** para quebrar o tempo sentado ao longo do dia.\n\nNesse caso, frequência ganha de duração.",
+    };
+  }
+
+  if (normalized.includes("rotina em pe para a lombar")) {
+    return {
+      content:
+        "Perfeito. Criei uma **rotina em pé para a lombar** com movimentos controlados e curtos.\n\nÉ uma forma mais segura de ganhar mobilidade sem exagerar na amplitude.",
+    };
+  }
+
+  if (normalized.includes("tarefa de 5 minutos para hoje")) {
+    return {
+      content:
+        "Pronto. Deixei um **reset de 5 minutos para hoje** como próximo passo.\n\nÉ o menor bloco útil para interromper o ciclo de ficar parado.",
+    };
+  }
+
+  if (normalized.includes("visao geral")) {
     return {
       content: `Hoje seu quadro está assim:\n\n- **${context.teamHabits?.length ?? 0} hábitos ativos**\n- **${context.teamTasks?.length ?? 0} tarefas abertas**\n- **${activityCount} próximas atividades**\n\nSeu foco principal agora é **${topHabit?.name ?? "movimento diário leve"}** (${topHabit?.progressLabel ?? "em progresso"}) e a tarefa mais relevante é **${topTask?.title ?? "definir o próximo passo"}**.`,
       suggestedActions: [
@@ -42,7 +345,7 @@ function buildCoachReply(content, context = {}) {
     };
   }
 
-  if (lower.includes("desafiar")) {
+  if (normalized.includes("desafiar")) {
     return {
       content: `Se a ideia é subir um degrau sem quebrar a constância, eu faria um ajuste pequeno:\n\n- **${topHabit?.name ?? "Hábito principal"}** pode subir de ${topHabit?.targetLabel ?? "10 min"} para **${context.challengeTarget ?? "15 min"}** em só um ou dois dias da semana.\n- **${topTask?.title ?? "Sua tarefa atual"}** pode ganhar um passo extra, mas ainda curto.\n\nA lógica é ficar só um pouco mais difícil, não virar outra vida.`,
       suggestedActions: [
@@ -58,7 +361,7 @@ function buildCoachReply(content, context = {}) {
     };
   }
 
-  if (lower.includes("pouco tempo") || lower.includes("corrido")) {
+  if (normalized.includes("pouco tempo") || normalized.includes("corrido")) {
     return {
       content:
         "Se hoje está corrido, a melhor jogada é proteger um bloco pequeno.\n\nEu faria assim:\n1. Escolha **6 minutos**.\n2. Prenda esse bloco a algo fixo do dia.\n3. Deixe pronta uma versão de resgate de **2 minutos**.\n\nQuer que eu crie isso como tarefa de hoje?",
@@ -75,7 +378,7 @@ function buildCoachReply(content, context = {}) {
     };
   }
 
-  if (lower.includes("semana")) {
+  if (normalized.includes("semana")) {
     return {
       content:
         "Boa. Para sua semana, eu manteria só três âncoras: um bloco curto na manhã, uma caminhada leve em um dia útil e um bloco semanal um pouco maior.\n\nTudo medido em minutos, sem inventar moda.",
@@ -88,7 +391,7 @@ function buildCoachReply(content, context = {}) {
     };
   }
 
-  if (lower.includes("parado") || lower.includes("sedent")) {
+  if (normalized.includes("parado") || normalized.includes("sedent")) {
     return {
       content:
         "Se a sensação é de estar muito parado, o primeiro objetivo não é intensidade. É só começar a se mover com frequência suficiente para o corpo e a rotina pararem de resistir.\n\nEu começaria com **um hábito diário de 8 a 12 minutos** e um **plano B de 2 a 3 minutos**.",
@@ -101,7 +404,7 @@ function buildCoachReply(content, context = {}) {
     };
   }
 
-  if (lower.includes("passo")) {
+  if (normalized.includes("passo")) {
     return {
       content:
         "Passos são uma boa métrica de base porque deixam o progresso visível sem te prender a treino formal.\n\nHoje eu usaria isso de forma simples: bater uma meta leve, repetir por alguns dias e só depois subir.",
@@ -121,10 +424,10 @@ function buildCoachReply(content, context = {}) {
 }
 
 function createFollowUpItem({ message, teamId, linkedConversationId }) {
-  const lower = message.toLowerCase();
+  const normalized = normalizeMessage(message);
   const now = Date.now();
 
-  if (lower.includes("tarefa")) {
+  if (normalized.includes("tarefa") && !normalized.includes("meditacao") && !normalized.includes("mobilidade")) {
     return {
       task: {
         id: `task-${now}`,
@@ -148,7 +451,288 @@ function createFollowUpItem({ message, teamId, linkedConversationId }) {
     };
   }
 
-  if (lower.includes("resgate")) {
+  if (normalized.includes("pausa pos-trabalho")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Pausa pós-trabalho",
+        cadence: "Diário",
+        targetLabel: "8 min",
+        progress: 0,
+        progressLabel: "0 de 8 min",
+        statusLabel: "Começa hoje",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Pausa pós-trabalho",
+        description: "Um reset curto para destravar o corpo depois de ficar sentado.",
+        meta: "8 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("mobilidade para hoje")) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Mobilidade para destravar hoje",
+        description: "Fazer um bloco curto de caminhada leve e mobilidade antes do fim do dia.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "task",
+        title: "Mobilidade para destravar hoje",
+        description: "Um bloco curto já ajuda a sair do excesso de tempo sentado.",
+        meta: "8 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("rotina leve para a lombar")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Rotina leve para a lombar",
+        cadence: "Diário",
+        targetLabel: "6 min",
+        progress: 0,
+        progressLabel: "0 de 6 min",
+        statusLabel: "Movimento suave",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Rotina leve para a lombar",
+        description: "Uma sequência curta para aliviar rigidez sem exagerar.",
+        meta: "6 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (
+    normalized.includes("check-in de mobilidade") ||
+    normalized.includes("check-in leve")
+  ) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Check-in de mobilidade",
+        description: "Testar um bloco leve e observar se a lombar termina melhor do que começou.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "task",
+        title: "Check-in de mobilidade",
+        description: "Um check-in curto para avaliar como a lombar responde ao movimento leve.",
+        meta: "5 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (
+    normalized.includes("meditacao de 5 minutos") ||
+    normalized.includes("habito matinal de meditacao") ||
+    normalized.includes("habito noturno de meditacao")
+  ) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Meditação diária",
+        cadence: "Diário",
+        targetLabel: "5 min",
+        progress: 0,
+        progressLabel: "0 de 5 min",
+        statusLabel: "Começa hoje",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Meditação diária",
+        description: "Uma sessão curta e fixa para ganhar consistência sem pesar.",
+        meta: "5 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (
+    normalized.includes("meditacao para hoje") ||
+    normalized.includes("sessao guiada de meditacao") ||
+    normalized.includes("sessao guiada")
+  ) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Sessão curta de meditação",
+        description: "Separar alguns minutos ainda hoje para respirar e desacelerar.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "task",
+        title: "Sessão curta de meditação",
+        description: "Uma sessão curta para começar hoje sem complicar.",
+        meta: "5 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("rotina de mobilidade em casa")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Mobilidade em casa",
+        cadence: "Diário",
+        targetLabel: "6 min",
+        progress: 0,
+        progressLabel: "0 de 6 min",
+        statusLabel: "Pronta para hoje",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Mobilidade em casa",
+        description: "Sequência simples para destravar o corpo sem sair.",
+        meta: "6 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("versao sem impacto")) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Versão sem impacto",
+        description: "Executar uma sequência leve em pé, sem saltos e sem pressa.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "task",
+        title: "Versão sem impacto",
+        description: "Plano curto para sair da rigidez sem impacto.",
+        meta: "5 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("habito de pausa curta")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Pausa curta para a lombar",
+        cadence: "Diário",
+        targetLabel: "2 min",
+        progress: 0,
+        progressLabel: "0 de 2 min",
+        statusLabel: "Repetir ao longo do dia",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Pausa curta para a lombar",
+        description: "Uma pausa curta e frequente tende a ajudar mais do que esperar demais.",
+        meta: "2 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("rotina em pe para a lombar")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Rotina em pé para a lombar",
+        cadence: "Diário",
+        targetLabel: "5 min",
+        progress: 0,
+        progressLabel: "0 de 5 min",
+        statusLabel: "Movimento controlado",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Rotina em pé para a lombar",
+        description: "Sequência curta em pé para soltar sem exagerar.",
+        meta: "5 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("tarefa de 5 minutos para hoje")) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Reset de 5 minutos",
+        description: "Fazer 3 minutos andando e 2 minutos de mobilidade ainda hoje.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "task",
+        title: "Reset de 5 minutos",
+        description: "Bloco mínimo para quebrar o excesso de tempo sentado.",
+        meta: "5 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (normalized.includes("resgate")) {
     return {
       habit: {
         id: `habit-${now}`,
@@ -173,7 +757,7 @@ function createFollowUpItem({ message, teamId, linkedConversationId }) {
     };
   }
 
-  if (lower.includes("plano de semana")) {
+  if (normalized.includes("plano de semana")) {
     return {
       task: {
         id: `task-${now}`,
@@ -197,7 +781,7 @@ function createFollowUpItem({ message, teamId, linkedConversationId }) {
     };
   }
 
-  if (lower.includes("hábito diário")) {
+  if (normalized.includes("habito diario")) {
     return {
       habit: {
         id: `habit-${now}`,
@@ -222,7 +806,7 @@ function createFollowUpItem({ message, teamId, linkedConversationId }) {
     };
   }
 
-  if (lower.includes("desafio leve") || lower.includes("ajustar só o hábito")) {
+  if (normalized.includes("desafio leve") || normalized.includes("ajustar so o habito")) {
     return {
       task: {
         id: `task-${now}`,
@@ -253,12 +837,20 @@ export function PortalContainer() {
   const { theme, toggleTheme } = useTheme();
 
   const [activeTeamId, setActiveTeamId] = useState(MOCK_TEAMS[0].id);
-  const [conversations, setConversations] = useState(MOCK_CONVERSATIONS);
-  const [messagesByConversation, setMessagesByConversation] = useState(MOCK_MESSAGES_BY_CONVERSATION);
+  const [conversations, setConversations] = useState(() => [
+    ONBOARDING_CONVERSATION,
+    ...MOCK_CONVERSATIONS,
+  ]);
+  const [messagesByConversation, setMessagesByConversation] = useState(() => ({
+    [ONBOARDING_CONVERSATION.id]: [],
+    ...MOCK_MESSAGES_BY_CONVERSATION,
+  }));
   const [habits, setHabits] = useState(MOCK_HABITS);
   const [tasks, setTasks] = useState(MOCK_TASKS);
   const [upcomingActivities, setUpcomingActivities] = useState(MOCK_UPCOMING_ACTIVITIES);
-  const [activeConversationId, setActiveConversationId] = useState(MOCK_CONVERSATIONS[0].id);
+  const [activeConversationId, setActiveConversationId] = useState(ONBOARDING_CONVERSATION.id);
+  const [hasSeenFirstAssistantResponse, setHasSeenFirstAssistantResponse] = useState(false);
+  const [hasCreatedFirstItem, setHasCreatedFirstItem] = useState(false);
 
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
   const [rightWidth, setRightWidth] = useState(360);
@@ -289,8 +881,6 @@ export function PortalContainer() {
     conversations.find((conversation) => conversation.id === activeConversationId) ??
     visibleConversations[0] ??
     null;
-  const activeTeam =
-    MOCK_TEAMS.find((team) => team.id === activeTeamId) ?? MOCK_TEAMS[0];
   const messages = activeConversation
     ? messagesByConversation[activeConversation.id] ?? []
     : [];
@@ -323,6 +913,27 @@ export function PortalContainer() {
     );
   };
 
+  const updateConversationFromUserMessage = (conversationId, content) => {
+    const shouldRenameConversation =
+      conversationId === ONBOARDING_CONVERSATION.id || activeConversation?.title === "Nova conversa";
+
+    setConversations((previous) =>
+      previous.map((conversation) =>
+        conversation.id === conversationId
+          ? {
+              ...conversation,
+              title: shouldRenameConversation
+                ? buildConversationTitle(content)
+                : conversation.title,
+              preview: content,
+              updatedLabel: "Agora",
+              unread: 0,
+            }
+          : conversation
+      )
+    );
+  };
+
   const updateConversationPreview = (conversationId, preview) => {
     setConversations((previous) =>
       previous.map((conversation) =>
@@ -346,7 +957,7 @@ export function PortalContainer() {
       ...previous,
       [activeConversation.id]: [...(previous[activeConversation.id] ?? []), userMessage],
     }));
-    updateConversationPreview(activeConversation.id, content);
+    updateConversationFromUserMessage(activeConversation.id, content);
 
     setTimeout(() => {
       const reply = buildCoachReply(content, {
@@ -359,6 +970,7 @@ export function PortalContainer() {
         id: Date.now() + 1,
         role: "assistant",
         content: reply.content,
+        ...(reply.followUpQuestions ? { followUpQuestions: reply.followUpQuestions } : {}),
         ...(reply.suggestedActions ? { suggestedActions: reply.suggestedActions } : {}),
       };
 
@@ -366,6 +978,7 @@ export function PortalContainer() {
         ...previous,
         [activeConversation.id]: [...(previous[activeConversation.id] ?? []), assistantMessage],
       }));
+      setHasSeenFirstAssistantResponse(true);
       updateConversationPreview(activeConversation.id, reply.content.replace(/\n/g, " "));
 
       const followUp = createFollowUpItem({
@@ -382,6 +995,11 @@ export function PortalContainer() {
       }
       if (followUp?.activity) {
         setUpcomingActivities((previous) => [followUp.activity, ...previous]);
+      }
+      if (followUp?.habit || followUp?.task) {
+        setHasCreatedFirstItem(true);
+        setIsRightCollapsed(false);
+        setRightWidth(360);
       }
     }, 700);
   };
@@ -492,7 +1110,9 @@ export function PortalContainer() {
     });
   };
 
-  const showDashboard = dashboardMode !== "hidden";
+  const showConversationSidebar = hasSeenFirstAssistantResponse;
+  const showRightPanel = hasCreatedFirstItem;
+  const showDashboard = showConversationSidebar && dashboardMode !== "hidden";
   const dashboardLayout = showDashboard ? dashboardMode : "horizontal";
 
   const handleToggleDashboard = () => {
@@ -512,40 +1132,44 @@ export function PortalContainer() {
       style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "3rem" }}
     >
       <div className="flex h-full w-full font-secondary text-bodyPrimary">
-        <PortalSidebar
-          teams={MOCK_TEAMS}
-          activeTeamId={activeTeamId}
-          onTeamChange={setActiveTeamId}
-          conversations={visibleConversations}
-          activeConversationId={activeConversationId}
-          onSelectConversation={setActiveConversationId}
-          onNewConversation={handleNewConversation}
-        />
+        {showConversationSidebar && (
+          <PortalSidebar
+            teams={MOCK_TEAMS}
+            activeTeamId={activeTeamId}
+            onTeamChange={setActiveTeamId}
+            conversations={visibleConversations}
+            activeConversationId={activeConversationId}
+            onSelectConversation={setActiveConversationId}
+            onNewConversation={handleNewConversation}
+          />
+        )}
 
         <div className="relative flex min-w-[300px] flex-1 flex-col bg-navBackground">
-          <div className="z-20 flex flex-shrink-0 items-center justify-end gap-2 bg-navBackground p-3">
-            <button
-              onClick={toggleTheme}
-              className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-              title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
-            >
-              {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
-            </button>
-            <button
-              onClick={() => setSettingsOpen(true)}
-              className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-              title="Widgets do dashboard"
-            >
-              <Settings size={18} />
-            </button>
-            <button
-              onClick={handleToggleDashboard}
-              className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-              title="Alternar layout do dashboard"
-            >
-              <LayoutGrid size={18} />
-            </button>
-          </div>
+          {showConversationSidebar && (
+            <div className="z-20 flex flex-shrink-0 items-center justify-end gap-2 bg-navBackground p-3">
+              <button
+                onClick={toggleTheme}
+                className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+                title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
+              >
+                {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
+              </button>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+                title="Widgets do dashboard"
+              >
+                <Settings size={18} />
+              </button>
+              <button
+                onClick={handleToggleDashboard}
+                className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+                title="Alternar layout do dashboard"
+              >
+                <LayoutGrid size={18} />
+              </button>
+            </div>
+          )}
 
           <div
             className={cn(
@@ -612,41 +1236,41 @@ export function PortalContainer() {
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <ChatbotUI
-                conversationTitle={activeConversation?.title ?? "Conversa"}
-                teamName={activeTeam.name}
                 messages={messages}
                 onSendMessage={handleSendMessage}
-                isCentered={messages.length === 0}
+                isCentered={!showConversationSidebar || messages.length === 0}
               />
             </div>
           </div>
         </div>
 
-        <div
-          className={cn(
-            "relative flex flex-shrink-0 flex-col overflow-hidden bg-navBackground border-l border-cardStroke",
-            isResizing === "right" ? "" : "transition-all duration-500 ease-in-out"
-          )}
-          style={{ width: rightWidth }}
-        >
+        {showRightPanel && (
           <div
-            onMouseDown={(event) => startResizing(event, "right")}
             className={cn(
-              "absolute left-0 top-0 z-20 h-full w-2 cursor-col-resize bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
-              isResizing === "right" ? "opacity-100" : "opacity-0 hover:opacity-100"
+              "relative flex flex-shrink-0 flex-col overflow-hidden border-l border-cardStroke bg-navBackground",
+              isResizing === "right" ? "" : "transition-all duration-500 ease-in-out"
             )}
-            style={{ left: -4 }}
-          />
+            style={{ width: rightWidth }}
+          >
+            <div
+              onMouseDown={(event) => startResizing(event, "right")}
+              className={cn(
+                "absolute left-0 top-0 z-20 h-full w-2 cursor-col-resize bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
+                isResizing === "right" ? "opacity-100" : "opacity-0 hover:opacity-100"
+              )}
+              style={{ left: -4 }}
+            />
 
-          <CatalogPanel
-            activities={teamActivities}
-            habits={teamHabits}
-            tasks={teamTasks}
-            isCollapsed={isRightCollapsed}
-            onToggleCollapse={toggleRightCollapse}
-            onActivityClick={handleActivityClick}
-          />
-        </div>
+            <CatalogPanel
+              activities={teamActivities}
+              habits={teamHabits}
+              tasks={teamTasks}
+              isCollapsed={isRightCollapsed}
+              onToggleCollapse={toggleRightCollapse}
+              onActivityClick={handleActivityClick}
+            />
+          </div>
+        )}
 
         <WidgetSettingsDialog
           open={settingsOpen}

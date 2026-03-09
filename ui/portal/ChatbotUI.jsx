@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Sparkles, Gauge, TrendingUp } from "lucide-react";
+import { Send, Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
 
 const STARTER_SUGGESTIONS = [
   {
-    id: 1,
-    title: "Visão Geral",
-    desc: "Me mostra uma visão geral do meu estado atual em hábitos, tarefas e progresso.",
-    icon: Gauge,
+    id: "sitting",
+    label: "Fiquei sentado o dia todo hoje",
+    message: "Fiquei sentado o dia todo hoje",
   },
   {
-    id: 2,
-    title: "Quero me desafiar",
-    desc: "Quero me desafiar um pouco. Me sugere aumentar um hábito ou tarefa sem exagerar.",
-    icon: TrendingUp,
+    id: "lower-back",
+    label: "Sinto dores na lombar",
+    message: "Sinto dores na lombar",
+  },
+  {
+    id: "meditation",
+    label: "Quero meditar",
+    message: "Quero meditar",
   },
 ];
 
@@ -29,8 +32,6 @@ function renderRichText(content) {
 }
 
 export function ChatbotUI({
-  conversationTitle,
-  teamName,
   messages,
   onSendMessage,
   isCentered,
@@ -76,20 +77,6 @@ export function ChatbotUI({
             isCentered || isEmpty ? "max-w-3xl" : "max-w-4xl"
           )}
         >
-          <div className="mb-6 flex items-start justify-between gap-4">
-            <div>
-              <p className="text-2xs font-semibold uppercase tracking-[0.18em] text-hAccent">
-                {teamName}
-              </p>
-              <h2 className="mt-1 text-xl font-primary text-title md:text-2xl">
-                {conversationTitle}
-              </h2>
-              <p className="mt-1 text-sm text-subtitle">
-                O coach aprende aos poucos e te puxa para o próximo passo viável.
-              </p>
-            </div>
-          </div>
-
           {!isEmpty && (
             <div className="flex flex-col space-y-6">
               {messages.map((message) => (
@@ -112,17 +99,46 @@ export function ChatbotUI({
                       className="text-sm leading-relaxed [&>p]:mt-2 first:[&>p]:mt-0"
                       dangerouslySetInnerHTML={{ __html: renderRichText(message.content) }}
                     />
-                    {message.suggestedActions?.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2 border-t border-secondaryCardStroke/60 pt-3">
-                        {message.suggestedActions.map((action) => (
-                          <button
-                            key={action.label}
-                            onClick={() => onSendMessage?.(action.message)}
-                            className="rounded-full border border-secondaryCardStroke bg-cardBackground px-3 py-1.5 text-sm font-medium text-title transition-colors hover:border-hAccent hover:bg-cardBackgroundHover"
-                          >
-                            {action.label}
-                          </button>
-                        ))}
+                    {(message.followUpQuestions?.length > 0 ||
+                      message.suggestedActions?.length > 0) && (
+                      <div className="mt-3 border-t border-secondaryCardStroke/60 pt-3">
+                        {message.followUpQuestions?.length > 0 && (
+                          <div>
+                            <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.18em] text-subtitle">
+                              Perguntas opcionais
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {message.followUpQuestions.map((question) => (
+                                <button
+                                  key={question}
+                                  onClick={() => onSendMessage?.(question)}
+                                  className="rounded-full border border-secondaryCardStroke bg-cardBackground px-3 py-1.5 text-sm font-medium text-subtitle transition-colors hover:border-hAccent hover:bg-cardBackgroundHover hover:text-title"
+                                >
+                                  {question}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {message.suggestedActions?.length > 0 && (
+                          <div className={cn(message.followUpQuestions?.length > 0 && "mt-3")}>
+                            <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.18em] text-subtitle">
+                              Ações sugeridas
+                            </p>
+                            <div className="flex flex-wrap gap-2">
+                              {message.suggestedActions.map((action) => (
+                                <button
+                                  key={action.label}
+                                  onClick={() => onSendMessage?.(action.message)}
+                                  className="rounded-full border border-secondaryCardStroke bg-cardBackground px-3 py-1.5 text-sm font-medium text-title transition-colors hover:border-hAccent hover:bg-cardBackgroundHover"
+                                >
+                                  {action.label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -152,7 +168,7 @@ export function ChatbotUI({
               Movimentador
             </p>
             <h1 className="text-3xl font-primary text-title md:text-4xl">
-              Qual pequeno passo vamos dar hoje?
+              O que mais parece com o seu dia hoje?
             </h1>
           </div>
 
@@ -160,7 +176,7 @@ export function ChatbotUI({
             <textarea
               ref={textareaRef}
               className="max-h-32 flex-1 resize-none bg-transparent py-2 pr-2 text-title outline-none placeholder:text-subtitle/60"
-              placeholder="Conte como foi seu dia, seus minutos, passos ou o que está te travando..."
+              placeholder="Conte o que você está sentindo ou escolha um atalho abaixo..."
               value={inputValue}
               onChange={(event) => {
                 setInputValue(event.target.value);
@@ -186,15 +202,13 @@ export function ChatbotUI({
             )}
           >
             {STARTER_SUGGESTIONS.map((suggestion) => {
-              const Icon = suggestion.icon;
               return (
                 <button
                   key={suggestion.id}
-                  onClick={() => onSendMessage?.(suggestion.desc)}
-                  className="flex items-center gap-2 rounded-full border border-secondaryCardStroke bg-secondaryCardBackground px-3 py-2 text-sm font-medium text-subtitle transition-colors hover:border-hAccent hover:bg-cardBackgroundHover hover:text-title"
+                  onClick={() => onSendMessage?.(suggestion.message)}
+                  className="rounded-full border border-secondaryCardStroke bg-secondaryCardBackground px-3 py-2 text-sm font-medium text-subtitle transition-colors hover:border-hAccent hover:bg-cardBackgroundHover hover:text-title"
                 >
-                  <Icon size={16} className="text-icons" />
-                  <span>{suggestion.title}</span>
+                  <span>{suggestion.label}</span>
                 </button>
               );
             })}
