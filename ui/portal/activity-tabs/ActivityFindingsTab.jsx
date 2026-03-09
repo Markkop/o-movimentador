@@ -2,11 +2,11 @@ import { ShieldAlert, ShieldCheck, ShieldQuestion, Info } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const SEVERITY_CONFIG = {
-  Blocked: { color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30" },
-  High: { color: "text-salmon", bg: "bg-salmon/10", border: "border-salmon/30" },
-  Medium: { color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/30" },
-  Low: { color: "text-lightBlue", bg: "bg-lightBlue/10", border: "border-lightBlue/30" },
-  Note: { color: "text-icons", bg: "bg-icons/10", border: "border-icons/30" },
+  Travado: { color: "text-red-500", bg: "bg-red-500/10", border: "border-red-500/30" },
+  Alto: { color: "text-salmon", bg: "bg-salmon/10", border: "border-salmon/30" },
+  Médio: { color: "text-yellow-500", bg: "bg-yellow-500/10", border: "border-yellow-500/30" },
+  Baixo: { color: "text-lightBlue", bg: "bg-lightBlue/10", border: "border-lightBlue/30" },
+  Nota: { color: "text-icons", bg: "bg-icons/10", border: "border-icons/30" },
 };
 
 const REMEDIATION_CONFIG = {
@@ -17,7 +17,7 @@ const REMEDIATION_CONFIG = {
 };
 
 function SeverityBadge({ severity }) {
-  const config = SEVERITY_CONFIG[severity] ?? SEVERITY_CONFIG.Note;
+  const config = SEVERITY_CONFIG[severity] ?? SEVERITY_CONFIG.Nota;
   return (
     <span className={cn("inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-medium border", config.color, config.bg, config.border)}>
       {severity}
@@ -40,7 +40,7 @@ function RemediationBadge({ state }) {
 }
 
 function SeverityCard({ label, count, severity }) {
-  const config = SEVERITY_CONFIG[severity] ?? SEVERITY_CONFIG.Note;
+  const config = SEVERITY_CONFIG[severity] ?? SEVERITY_CONFIG.Nota;
   return (
     <div className={cn("flex flex-col items-center p-3 rounded-lg border", config.border, config.bg)}>
       <p className={cn("text-2xl font-bold", config.color)}>{count}</p>
@@ -60,11 +60,11 @@ export function ActivityFindingsTab({ findings = [] }) {
   }
 
   const severityCounts = {
-    Blocked: findings.filter((f) => f.severity === "Blocked").length,
-    High: findings.filter((f) => f.severity === "High").length,
-    Medium: findings.filter((f) => f.severity === "Medium").length,
-    Low: findings.filter((f) => f.severity === "Low").length,
-    Note: findings.filter((f) => f.severity === "Note").length,
+    Travado: findings.filter((f) => f.severity === "Travado").length,
+    Alto: findings.filter((f) => f.severity === "Alto").length,
+    Médio: findings.filter((f) => f.severity === "Médio").length,
+    Baixo: findings.filter((f) => f.severity === "Baixo").length,
+    Nota: findings.filter((f) => f.severity === "Nota").length,
   };
 
   return (

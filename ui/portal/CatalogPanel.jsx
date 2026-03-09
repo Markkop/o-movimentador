@@ -98,7 +98,7 @@ function AssetPickerItem({ asset, onSelect }) {
 function TaskCard({ task, onClick }) {
   const catalogModule = CATALOG_MODULES.find((m) => m.id === task.moduleId);
   const AssetIcon = ASSET_TYPE_ICON_MAP[task.asset?.type] ?? FileText;
-  const isDone = task.status === "done";
+  const isDone = task.status === "concluída";
   const totalStages = task.stages.length;
   const progressPercent = isDone ? 100 : Math.round((task.currentStage / (totalStages - 1)) * 100);
 
@@ -135,7 +135,7 @@ function TaskCard({ task, onClick }) {
 function TaskDetailsDialog({ task, onClose }) {
   if (!task) return null;
 
-  const isDone = task.status === "done";
+  const isDone = task.status === "concluída";
   const totalStages = task.stages.length;
   const progressPercent = isDone ? 100 : Math.round((task.currentStage / (totalStages - 1)) * 100);
   const TaskIcon = CATALOG_MODULES.find((m) => m.id === task.moduleId)?.icon ?? Scan;
@@ -332,7 +332,7 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
       asset: { id: asset.id, name: asset.name, type: asset.type },
       stages: module.stages,
       currentStage: 0,
-      status: "running",
+      status: "em andamento",
     };
 
     setTasks((prev) => [newTask, ...prev]);
@@ -346,7 +346,7 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
         clearInterval(interval);
         setTasks((prev) =>
           prev.map((t) =>
-            t.id === taskId ? { ...t, currentStage: lastStageIndex, status: "done" } : t
+            t.id === taskId ? { ...t, currentStage: lastStageIndex, status: "concluída" } : t
           )
         );
       } else {
@@ -411,7 +411,7 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
                 <div className="w-6 border-t border-cardStroke my-1 flex-shrink-0" />
                 {tasks.map((task) => {
                   const TaskIcon = CATALOG_MODULES.find((m) => m.id === task.moduleId)?.icon ?? Scan;
-                  const isDone = task.status === "done";
+                  const isDone = task.status === "concluída";
                   return (
                     <Tooltip key={task.id}>
                       <TooltipTrigger asChild>
