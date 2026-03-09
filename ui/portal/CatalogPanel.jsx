@@ -12,57 +12,57 @@ import { Popover, PopoverTrigger, PopoverContent } from "../components/ui/popove
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "../components/ui/dialog";
 
 const ASSET_TYPE_ICON_MAP = {
-  "Workout Plan": FileCode,
-  "Routine": AppWindow,
-  "Weekly Schedule": Network,
-  "Meal Guide": ScrollText,
+  Caminhada: FileCode,
+  Rotina: AppWindow,
+  "Agenda semanal": Network,
+  "Guia alimentar": ScrollText,
   "Checklist": FileText,
-  "Environment": Server,
-  "Sleep Plan": Shield,
-  "Progress Log": FileText,
-  "Activity": FileText,
+  Ambiente: Server,
+  "Plano de sono": Shield,
+  Diário: FileText,
+  Jornada: FileText,
 };
 
 const CATALOG_MODULES = [
   {
     id: "activation-plan",
-    name: "Activation Plan",
+    name: "Plano da semana",
     icon: Scan,
     color: "text-salmon",
-    assetTypes: ["Workout Plan", "Routine", "Weekly Schedule"],
-    stages: ["Reading your baseline", "Choosing the first small step", "Building week one", "Ready"],
+    assetTypes: ["Caminhada", "Rotina", "Agenda semanal"],
+    stages: ["Lendo seu ponto de partida", "Escolhendo o menor primeiro passo", "Montando a semana 1", "Pronto"],
   },
   {
     id: "consistency-check",
-    name: "Consistency Check",
+    name: "Checagem de constância",
     icon: ClipboardCheck,
     color: "text-lightBlue",
-    assetTypes: ["Meal Guide", "Checklist", "Progress Log"],
-    stages: ["Reviewing the routine", "Spotting friction", "Simplifying the plan", "Ready"],
+    assetTypes: ["Guia alimentar", "Checklist", "Diário"],
+    stages: ["Revisando sua rotina", "Encontrando atritos", "Simplificando o plano", "Pronto"],
   },
   {
     id: "coach-review",
-    name: "Coach Review",
+    name: "Revisão do coach",
     icon: Briefcase,
     color: "text-hAccent",
-    assetTypes: ["Activity"],
-    stages: ["Opening the review", "Checking wins", "Highlighting friction", "Ready"],
+    assetTypes: ["Jornada"],
+    stages: ["Abrindo a revisão", "Checando vitórias", "Destacando atritos", "Pronto"],
   },
   {
     id: "sleep-reset",
-    name: "Sleep Reset",
+    name: "Reset do sono",
     icon: Shield,
     color: "text-black-green",
-    assetTypes: ["Sleep Plan"],
-    stages: ["Reviewing the evening", "Reducing friction", "Setting shutdown cues", "Ready"],
+    assetTypes: ["Plano de sono"],
+    stages: ["Revisando sua noite", "Reduzindo atrito", "Criando gatilhos de desligamento", "Pronto"],
   },
   {
     id: "momentum-check",
-    name: "Momentum Check",
+    name: "Ajuste de atrito",
     icon: Activity,
     color: "text-black-lightBlue",
-    assetTypes: ["Environment", "Workout Plan", "Routine", "Progress Log"],
-    stages: ["Reviewing progress", "Finding the pattern", "Suggesting next moves", "Ready"],
+    assetTypes: ["Ambiente", "Caminhada", "Rotina", "Diário"],
+    stages: ["Revisando o andamento", "Encontrando o padrão", "Sugerindo próximos passos", "Pronto"],
   },
 ];
 
@@ -159,14 +159,14 @@ function TaskDetailsDialog({ task, onClose }) {
               )}
             </div>
           </DialogTitle>
-          <DialogDescription className="sr-only">Step details and progress</DialogDescription>
+          <DialogDescription className="sr-only">Detalhes da atividade e progresso</DialogDescription>
         </DialogHeader>
 
         <div className="p-5 space-y-6">
           {/* Progress Section */}
           <div className="space-y-2.5">
             <div className="flex justify-between items-end text-sm">
-              <span className="text-subtitle font-medium">Overall Progress</span>
+              <span className="text-subtitle font-medium">Progresso geral</span>
               <span className={cn("font-bold text-lg leading-none", isDone ? "text-black-green" : "text-hAccent")}>
                 {progressPercent}%
               </span>
@@ -181,7 +181,7 @@ function TaskDetailsDialog({ task, onClose }) {
 
           {/* Stages */}
           <div className="space-y-1">
-            <h4 className="text-xs font-bold text-title uppercase tracking-wider mb-3 px-1">Guided Steps</h4>
+            <h4 className="text-xs font-bold text-title uppercase tracking-wider mb-3 px-1">Etapas guiadas</h4>
             <div className="bg-cardBackground rounded-xl border border-cardStroke overflow-hidden">
               {task.stages.map((stage, idx) => {
                 const isCompleted = isDone || idx < task.currentStage;
@@ -213,7 +213,7 @@ function TaskDetailsDialog({ task, onClose }) {
           {/* Additional details */}
           <div className="text-xs text-subtitle flex justify-between bg-cardBackground p-3 rounded-lg border border-cardStroke">
             <span className="flex flex-col gap-1">
-              <span className="uppercase text-[10px] font-bold opacity-70">Step ID</span>
+              <span className="uppercase text-[10px] font-bold opacity-70">ID</span>
               <span className="font-mono text-title">{task.id.split('-').pop()}</span>
             </span>
             <span className="flex flex-col gap-1 text-right">
@@ -267,14 +267,14 @@ function ModuleButton({ module, assets, onSpawnTask, variant = "expanded" }) {
           </TooltipTrigger>
           {!open && (
             <TooltipContent side="left">
-              {module.name} ({matching.length} resource{matching.length !== 1 ? "s" : ""})
+              {module.name} ({matching.length} hábito{matching.length !== 1 ? "s" : ""})
             </TooltipContent>
           )}
         </Tooltip>
         {matching.length > 1 && (
           <PopoverContent side="left" align="start" className="w-56 p-2">
             <p className="text-xs font-semibold text-title px-2.5 pb-1.5 mb-1 border-b border-cardStroke">
-              Select resource for {module.name}
+              Escolha um hábito para {module.name}
             </p>
             <div className="max-h-48 overflow-y-auto space-y-0.5 scrollbar-thin">
               {matching.map((asset) => (
@@ -303,7 +303,7 @@ function ModuleButton({ module, assets, onSpawnTask, variant = "expanded" }) {
       {matching.length > 1 && (
         <PopoverContent side="left" align="start" className="w-56 p-2">
           <p className="text-xs font-semibold text-title px-2.5 pb-1.5 mb-1 border-b border-cardStroke">
-            Select resource for {module.name}
+            Escolha um hábito para {module.name}
           </p>
           <div className="max-h-48 overflow-y-auto space-y-0.5 scrollbar-thin">
             {matching.map((asset) => (
@@ -390,7 +390,7 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
                 <PanelRightOpen size={18} />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="left">Expand Guides</TooltipContent>
+            <TooltipContent side="left">Expandir próximas atividades</TooltipContent>
           </Tooltip>
 
           <div className="w-6 border-t border-cardStroke my-1 flex-shrink-0" />
@@ -447,11 +447,11 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
           )}
         >
           <div className="p-4 border-b border-cardStroke sticky top-0 bg-navBackground z-10 flex items-center justify-between">
-            <h2 className="font-primaryCondensed font-bold text-lg text-title tracking-widest uppercase">Guides</h2>
+            <h2 className="font-primaryCondensed font-bold text-lg text-title tracking-widest uppercase">Próximas atividades</h2>
             <button
               onClick={onToggleCollapse}
               className="p-1.5 hover:bg-cardBackgroundHover rounded-md text-icons hover:text-hAccent transition-colors"
-              title="Collapse Guides"
+              title="Recolher próximas atividades"
             >
               <PanelRightClose size={18} />
             </button>
@@ -462,7 +462,7 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
             <div>
               {matchingModules.length === 0 ? (
                 <p className="text-sm text-subtitle text-center py-6">
-                  No guides are available for your current resource types.
+                  Nenhuma ação guiada disponível para os tipos de hábito atuais.
                 </p>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
@@ -482,7 +482,7 @@ export const CatalogPanel = forwardRef(function CatalogPanel({ assets = [], isCo
             {/* Tasks */}
             {tasks.length > 0 && (
               <div>
-                <h3 className="text-sm font-semibold text-title mb-3 uppercase tracking-wider opacity-80">Active Steps</h3>
+                <h3 className="text-sm font-semibold text-title mb-3 uppercase tracking-wider opacity-80">Atividades ativas</h3>
                 <div className="space-y-2">
                   {tasks.map((task) => (
                     <TaskCard key={task.id} task={task} onClick={setSelectedTask} />

@@ -14,10 +14,10 @@ import { WIDGET_REGISTRY } from "./widgetRegistry";
 import { renderWidgetContent } from "./WidgetContent";
 
 const CATEGORY_LABELS = {
-  overview: "Overview",
-  momentum: "Momentum",
-  coaching: "Coaching",
-  routine: "Routine",
+  overview: "Visão geral",
+  momentum: "Ritmo",
+  coaching: "Acompanhamento",
+  routine: "Rotina",
 };
 
 function groupWidgetsByCategory() {
@@ -70,10 +70,10 @@ export function WidgetSettingsDialog({
         <div className="w-1/3 border-r border-cardStroke flex flex-col h-full bg-navBackground">
           <DialogHeader className="px-5 pt-5 pb-3 shrink-0 text-left">
             <DialogTitle className="text-base font-primaryCondensed font-bold tracking-widest uppercase text-title">
-              Progress Widgets
+              Widgets de progresso
             </DialogTitle>
             <DialogDescription className="text-xs text-subtitle">
-              Select a widget to preview and pin to your board.
+              Escolha um widget para visualizar e fixar no seu painel.
             </DialogDescription>
           </DialogHeader>
 
@@ -84,7 +84,7 @@ export function WidgetSettingsDialog({
                   <div className="flex items-center gap-2 text-hAccent">
                     <Sparkles size={14} />
                     <span className="text-xs font-semibold uppercase tracking-wider">
-                      Suggested
+                      Sugestão
                     </span>
                   </div>
                   <button
@@ -167,12 +167,12 @@ export function WidgetSettingsDialog({
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 text-sm font-medium text-title mb-4">
                     <Settings2 size={16} className="text-icons" />
-                    Details
+                    Detalhes
                   </div>
                   
                   {/* Placeholder for widget specific settings */}
                   <div className="p-4 rounded-lg border border-cardStroke bg-navBackground text-sm text-subtitle text-center">
-                    No extra settings are available for this widget yet.
+                    Este widget ainda não possui ajustes extras.
                   </div>
                 </div>
               </div>
@@ -183,7 +183,7 @@ export function WidgetSettingsDialog({
                   onClick={() => onOpenChange(false)}
                   className="px-4 py-2 rounded-md text-sm font-medium text-title hover:bg-cardBackgroundHover transition-colors"
                 >
-                  Close
+                  Fechar
                 </button>
                 <button
                   onClick={handleAddRemove}
@@ -197,12 +197,12 @@ export function WidgetSettingsDialog({
                   {isActive ? (
                     <>
                       <X size={16} />
-                      Remove Widget
+                      Remover widget
                     </>
                   ) : (
                     <>
                       <Plus size={16} />
-                      Add Widget
+                      Adicionar widget
                     </>
                   )}
                 </button>
@@ -210,7 +210,7 @@ export function WidgetSettingsDialog({
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center text-subtitle">
-              Select a widget to preview
+              Escolha um widget para visualizar
             </div>
           )}
         </div>

@@ -35,9 +35,9 @@ export function ChatbotUI({ messages, onSendMessage, onAddAsset, isCentered, rec
   }, []);
 
   const suggestions = [
-    { id: 1, title: 'Build My First Week', desc: 'Help me go from inactive to active with a simple first week', icon: <FileText size={16} /> },
-    { id: 2, title: 'Fix My Routine', desc: 'Show me what habits are slowing me down', icon: <Shield size={16} /> },
-    { id: 3, title: 'Stay Consistent', desc: 'Give me a plan to keep moving even on low-energy days', icon: <Network size={16} /> },
+    { id: 1, title: 'Montar minha semana 1', desc: 'Me ajuda a sair do zero com uma primeira semana simples', icon: <FileText size={16} /> },
+    { id: 2, title: 'Destravar minha rotina', desc: 'Me mostra quais hábitos estão me travando', icon: <Shield size={16} /> },
+    { id: 3, title: 'Manter constância', desc: 'Me dá um plano para continuar me movendo mesmo nos dias de baixa energia', icon: <Network size={16} /> },
   ];
 
   const handleSend = () => {
@@ -78,7 +78,7 @@ export function ChatbotUI({ messages, onSendMessage, onAddAsset, isCentered, rec
         <div className="absolute inset-0 z-50 flex items-center justify-center bg-navBackground/80 backdrop-blur-sm border-2 border-dashed border-hAccent rounded-lg m-4 pointer-events-none">
           <div className="flex flex-col items-center text-hAccent">
             <UploadCloud size={48} className="mb-4" />
-            <p className="text-xl font-medium">Drop to attach resource</p>
+            <p className="text-xl font-medium">Solte aqui para anexar</p>
           </div>
         </div>
       )}
@@ -117,15 +117,15 @@ export function ChatbotUI({ messages, onSendMessage, onAddAsset, isCentered, rec
                   </div>
                 )}
 
-                {/* Upload zone when AI requests resources */}
-                {msg.content.includes('drag and drop resources') && msg.role === 'assistant' && (
+                {/* Upload zone when AI requests habits or materials */}
+                {msg.content.includes('Arraste hábitos e materiais') && msg.role === 'assistant' && (
                   <button
                     onClick={onAddAsset}
                     className="mt-4 p-4 w-full border border-dashed border-secondaryCardStroke rounded-lg flex flex-col items-center justify-center text-icons hover:text-hAccent hover:border-hAccent cursor-pointer transition-colors bg-cardStroke/10"
                   >
                     <UploadCloud className="mb-2" size={24} />
-                    <p className="text-sm font-medium">Drag & Drop Resources Here</p>
-                    <p className="text-xs mt-1 opacity-70">Supported: notes, schedules, checklists, links, and PDFs</p>
+                    <p className="text-sm font-medium">Arraste hábitos e materiais aqui</p>
+                    <p className="text-xs mt-1 opacity-70">Vale rotina, agenda, checklist, link ou diário</p>
                   </button>
                 )}
 
@@ -160,7 +160,7 @@ export function ChatbotUI({ messages, onSendMessage, onAddAsset, isCentered, rec
             isEmpty ? "max-h-32 opacity-100 mb-8" : "max-h-0 opacity-0 mb-0"
           )}>
             <h1 className="text-3xl md:text-4xl font-primary text-title text-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-              What small win are we building today?
+              Qual pequeno movimento vamos destravar hoje?
             </h1>
           </div>
 
@@ -186,7 +186,7 @@ export function ChatbotUI({ messages, onSendMessage, onAddAsset, isCentered, rec
             <textarea
               ref={textareaRef}
               className="flex-1 bg-transparent pr-2 text-title placeholder-subtitle/50 resize-none outline-none max-h-32 self-center py-2"
-              placeholder="Ask about routines, movement, meals, or momentum..."
+              placeholder="Pergunte sobre hábitos, passos, energia ou próximas atividades..."
               value={inputValue}
               onChange={(e) => {
                 setInputValue(e.target.value);

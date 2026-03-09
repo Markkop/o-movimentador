@@ -46,7 +46,7 @@ function WidgetHeader({ title, icon: Icon }) {
 function ConsistencyScoreWidget() {
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Consistency Score" icon={ShieldAlert} />
+      <WidgetHeader title="Índice de constância" icon={ShieldAlert} />
       <div className="flex-1 px-4 pb-4 pt-2 flex items-center cancel-drag">
         <div className="flex items-end gap-2">
           <span className="font-bold text-title text-4xl">84</span>
@@ -62,11 +62,11 @@ function ConsistencyScoreWidget() {
 function TodayPlanWidget() {
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Today's Plan" icon={Activity} />
+      <WidgetHeader title="Plano de hoje" icon={Activity} />
       <div className="flex-1 px-4 pb-4 pt-2 flex items-center cancel-drag">
         <div className="flex items-end gap-2">
           <span className="font-bold text-title text-4xl">3</span>
-          <span className="text-sm text-subtitle mb-1">small wins queued</span>
+          <span className="text-sm text-subtitle mb-1">pequenas ações na fila</span>
         </div>
       </div>
     </div>
@@ -76,7 +76,7 @@ function TodayPlanWidget() {
 function ActivityWidget() {
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Current Activity Phase" icon={CheckCircle2} />
+      <WidgetHeader title="Fase atual" icon={CheckCircle2} />
       <div className="flex-1 px-4 pb-4 pt-2 flex flex-col justify-center cancel-drag">
         <div className="relative pt-1 w-full">
           <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-secondaryCardStroke">
@@ -86,9 +86,9 @@ function ActivityWidget() {
             />
           </div>
           <div className="flex justify-between text-xs text-subtitle font-medium">
-            <span>Start</span>
-            <span className="text-title">Repeat (65%)</span>
-            <span>Identity</span>
+            <span>Início</span>
+            <span className="text-title">Repetição (65%)</span>
+            <span>Identidade</span>
           </div>
         </div>
       </div>
@@ -97,17 +97,17 @@ function ActivityWidget() {
 }
 
 const ALERT_DATA = [
-  { id: 1, title: "Shoes are still hidden in the closet", severity: "Blocked", color: "text-red-600" },
-  { id: 2, title: "Lunch break walk happened twice this week", severity: "Win", color: "text-black-green" },
-  { id: 3, title: "Rainy-day backup plan is missing", severity: "High", color: "text-salmon" },
-  { id: 4, title: "Phone use is delaying the morning routine", severity: "High", color: "text-salmon" },
-  { id: 5, title: "Stretch mat placement is improving follow-through", severity: "Note", color: "text-lightBlue" },
+  { id: 1, title: "O tênis ainda está escondido no armário", severity: "Travado", color: "text-red-600" },
+  { id: 2, title: "A caminhada do almoço aconteceu duas vezes nesta semana", severity: "Vitória", color: "text-black-green" },
+  { id: 3, title: "Ainda falta um plano B para dias de chuva", severity: "Alto", color: "text-salmon" },
+  { id: 4, title: "O celular está atrasando a rotina da manhã", severity: "Alto", color: "text-salmon" },
+  { id: 5, title: "A posição do tapete está melhorando a execução", severity: "Nota", color: "text-lightBlue" },
 ];
 
 function WinsWidget() {
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Wins & Friction" icon={AlertTriangle} />
+      <WidgetHeader title="Vitórias e atritos" icon={AlertTriangle} />
       <div className="flex-1 px-4 pb-4 pt-2 overflow-y-auto cancel-drag">
         <div className="space-y-3">
           {ALERT_DATA.map((alert) => (
@@ -133,13 +133,13 @@ function WinsWidget() {
 function HabitBalanceWidget() {
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Habit Balance" icon={ClipboardCheck} />
+      <WidgetHeader title="Equilíbrio da rotina" icon={ClipboardCheck} />
       <div className="flex-1 px-4 pb-4 pt-2 cancel-drag">
         <div className="space-y-3">
           {[
-            { label: "Movement", pct: 72, color: "bg-hAccent" },
-            { label: "Sleep", pct: 68, color: "bg-lightBlue" },
-            { label: "Meals", pct: 81, color: "bg-black-green" },
+            { label: "Movimento", pct: 72, color: "bg-hAccent" },
+            { label: "Sono", pct: 68, color: "bg-lightBlue" },
+            { label: "Energia", pct: 81, color: "bg-black-green" },
           ].map((item) => (
             <div key={item.label}>
               <div className="flex justify-between text-xs text-subtitle mb-1">
@@ -166,7 +166,7 @@ function StreakTrendWidget() {
 
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Streak Trend" icon={BarChart3} />
+      <WidgetHeader title="Tendência da sequência" icon={BarChart3} />
       <div className="flex-1 px-4 pb-4 pt-2 cancel-drag flex items-end gap-1">
         {data.map((val, i) => (
           <div key={i} className="flex-1 flex flex-col items-center gap-1">
@@ -188,7 +188,7 @@ function StreakTrendWidget() {
 function RoutineCoverageWidget() {
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Routine Coverage" icon={Eye} />
+      <WidgetHeader title="Cobertura da rotina" icon={Eye} />
       <div className="flex-1 px-4 pb-4 pt-2 flex items-center justify-center cancel-drag">
         <div className="relative w-24 h-24">
           <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
@@ -206,7 +206,7 @@ function RoutineCoverageWidget() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-xl font-bold text-title">75%</span>
-            <span className="text-3xs text-subtitle">anchored</span>
+            <span className="text-3xs text-subtitle">com gatilho</span>
           </div>
         </div>
       </div>
@@ -216,15 +216,15 @@ function RoutineCoverageWidget() {
 
 function FocusBreakdownWidget() {
   const categories = [
-    { label: "Energy", score: 78, color: "bg-lightBlue" },
-    { label: "Timing", score: 91, color: "bg-hAccent" },
-    { label: "Environment", score: 66, color: "bg-salmon" },
-    { label: "Recovery", score: 84, color: "bg-black-green" },
+    { label: "Energia", score: 78, color: "bg-lightBlue" },
+    { label: "Horário", score: 91, color: "bg-hAccent" },
+    { label: "Ambiente", score: 66, color: "bg-salmon" },
+    { label: "Recuperação", score: 84, color: "bg-black-green" },
   ];
 
   return (
     <div className="flex flex-col h-full">
-      <WidgetHeader title="Focus Breakdown" icon={Shield} />
+      <WidgetHeader title="Mapa de foco" icon={Shield} />
       <div className="flex-1 px-4 pb-4 pt-2 cancel-drag">
         <div className="space-y-2.5">
           {categories.map((cat) => (

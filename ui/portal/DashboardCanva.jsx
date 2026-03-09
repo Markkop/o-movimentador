@@ -68,7 +68,7 @@ export function DashboardCanva({ cards = [], onUpdateCard, onRemoveWidget, layou
           {cards.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="text-sm text-subtitle">
-                No widgets added. Open settings to pin a few progress cards.
+                Nenhum widget adicionado. Abra as configurações para fixar alguns cartões de progresso.
               </p>
             </div>
           )}

@@ -2,55 +2,55 @@ import { AlertTriangle, Upload, ShieldAlert, FileCheck } from "lucide-react";
 
 export const RECOMMENDATIONS = {
   1: {
-    pill: "Momentum slipping",
+    pill: "Constância caindo",
     icon: AlertTriangle,
-    userMessage: "I see a warning that my momentum is slipping. What should I do?",
-    summary: "Your **10-Minute Walk Plan** has dropped from 5 sessions last week to 2 this week.",
+    userMessage: "Vi um alerta dizendo que minha constância caiu. O que eu faço?",
+    summary: "Sua **Caminhada de 10 minutos** caiu de 5 sessões na semana passada para 2 nesta semana.",
     detail:
-      "The biggest drop is happening on low-energy afternoons. Your plan is still workable, but the starting step is too large for tired days.\n\n**Best next move:**\n- Set a 5-minute backup version of the walk\n- Put shoes by the door before lunch\n- Keep one indoor route ready for bad weather",
+      "A maior queda está acontecendo nas tardes de baixa energia. O plano ainda faz sentido, mas o primeiro passo está grande demais para dias cansados.\n\n**Melhor próximo movimento:**\n- Criar uma versão de resgate de 5 minutos\n- Deixar o tênis perto da porta antes do almoço\n- Manter uma opção indoor pronta para dias ruins",
     actions: [
-      { label: "Shrink the Goal", message: "Help me shrink the walk goal for low-energy days" },
-      { label: "Show My Pattern", message: "Show me where my movement streak started to slip" },
-      { label: "Dismiss", message: "Thanks, I'll handle this manually" },
+      { label: "Diminuir a meta", message: "Me ajuda a diminuir a meta da caminhada para dias de baixa energia" },
+      { label: "Ver o padrão", message: "Me mostra onde minha sequência começou a cair" },
+      { label: "Dispensar", message: "Valeu, eu resolvo isso manualmente" },
     ],
   },
   2: {
-    pill: "Missing support",
+    pill: "Faltando plano B",
     icon: Upload,
-    userMessage: "I see a warning that a support resource is missing. What should I do?",
-    summary: "You added a **Weekly Schedule** but there is no simple backup plan for days when your routine breaks.",
+    userMessage: "Vi um alerta dizendo que falta um apoio importante. O que eu faço?",
+    summary: "Você adicionou uma **Agenda semanal**, mas ainda não existe um plano B simples para os dias em que a rotina quebra.",
     detail:
-      "Right now the plan depends on your ideal day. When timing shifts, there is nothing smaller to fall back to.\n\n**Add one backup resource** such as a short indoor walk, a 4-minute stretch, or a standing reset checklist so your momentum survives imperfect days.",
+      "Neste momento o plano depende do dia ideal. Quando o horário muda, não existe nada menor para recorrer.\n\n**Adicione um plano B** como uma caminhada indoor curta, um alongamento de 4 minutos ou um checklist rápido em pé para o movimento sobreviver aos dias imperfeitos.",
     actions: [
-      { label: "Add Backup Plan", message: "I want to add a backup movement plan for busy days" },
-      { label: "Build an Indoor Option", message: "Help me create an indoor backup routine" },
-      { label: "Skip for Now", message: "I'll add the backup plan later" },
+      { label: "Adicionar plano B", message: "Quero adicionar um plano B de movimento para dias corridos" },
+      { label: "Criar opção indoor", message: "Me ajuda a criar uma rotina indoor de resgate" },
+      { label: "Pular por enquanto", message: "Depois eu adiciono esse plano B" },
     ],
   },
   3: {
-    pill: "Energy dip ahead",
+    pill: "Queda de energia",
     icon: ShieldAlert,
-    userMessage: "I see an alert about an energy dip. What should I do?",
-    summary: "Your **Morning Energy Routine** is most likely to break on days with less than 6 hours of sleep.",
+    userMessage: "Vi um alerta sobre queda de energia. O que eu faço?",
+    summary: "Sua **Rotina de energia da manhã** tende a quebrar nos dias com menos de 6 horas de sono.",
     detail:
-      "The current morning routine asks for too much before your energy is stable.\n\n**Coach suggestion:**\n- Reduce the first action to under 3 minutes\n- Put water and shoes in sight the night before\n- Delay phone checking until after the first movement cue",
+      "A rotina atual pede demais antes de sua energia estabilizar.\n\n**Sugestão do coach:**\n- Reduzir a primeira ação para menos de 3 minutos\n- Deixar água e tênis visíveis na noite anterior\n- Adiar o celular até depois do primeiro gatilho de movimento",
     actions: [
-      { label: "Create a Low-Energy Version", message: "Create a low-energy version of my morning routine" },
-      { label: "Show Sleep Impact", message: "Show me how sleep is affecting my routine consistency" },
-      { label: "Acknowledge", message: "I've noted this advisory, thanks" },
+      { label: "Criar versão leve", message: "Cria uma versão de baixa energia da minha rotina da manhã" },
+      { label: "Ver impacto do sono", message: "Me mostra como o sono está afetando minha constância" },
+      { label: "Anotado", message: "Anotado, obrigado" },
     ],
   },
   4: {
-    pill: "Week complete",
+    pill: "Semana concluída",
     icon: FileCheck,
-    userMessage: "I see a note that my week is complete. What should I do next?",
-    summary: "Your **After-Work Mobility Streak** week is wrapped and ready for review.",
+    userMessage: "Vi uma nota dizendo que minha semana terminou. O que vem agora?",
+    summary: "Sua semana de **Sequência de mobilidade pós-trabalho** terminou e já pode ser revisada.",
     detail:
-      "You finished the cycle with 9 completed sessions and a stronger evening routine.\n\n**What worked:**\n1. Shorter sessions made it easier to start\n2. A backup flow protected the streak on busy days\n3. Consistent timing reduced decision fatigue\n\n**Next step:** Review the wins, keep the easiest anchors, and raise intensity only slightly.",
+      "Você fechou o ciclo com 9 sessões concluídas e uma rotina noturna mais forte.\n\n**O que funcionou:**\n1. Sessões curtas facilitaram o começo\n2. Um fluxo de resgate protegeu a sequência em dias corridos\n3. Um horário estável reduziu fadiga de decisão\n\n**Próximo passo:** revisar as vitórias, manter os gatilhos mais leves e subir a intensidade só um pouco.",
     actions: [
-      { label: "Open Weekly Review", message: "Open my weekly review for the mobility streak" },
-      { label: "Plan Next Week", message: "Help me plan the next week from this progress" },
-      { label: "Keep It Easy", message: "I want to keep the same level for one more week" },
+      { label: "Abrir revisão", message: "Abre minha revisão semanal da sequência de mobilidade" },
+      { label: "Planejar próxima semana", message: "Me ajuda a planejar a próxima semana com base nesse progresso" },
+      { label: "Manter leve", message: "Quero manter o mesmo nível por mais uma semana" },
     ],
   },
 };

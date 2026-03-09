@@ -2,9 +2,9 @@ import { GitBranch, Globe, FileUp } from "lucide-react";
 import { cn } from "../../lib/utils";
 
 const SOURCE_TYPE_CONFIG = {
-  repository: { icon: GitBranch, label: "Plan", color: "text-hAccent" },
+  repository: { icon: GitBranch, label: "Plano", color: "text-hAccent" },
   url: { icon: Globe, label: "Link", color: "text-lightBlue" },
-  file: { icon: FileUp, label: "Note", color: "text-salmon" },
+  file: { icon: FileUp, label: "Nota", color: "text-salmon" },
 };
 
 function SourceRow({ source }) {
@@ -25,7 +25,7 @@ function SourceRow({ source }) {
         )}
         {source.files?.length > 0 && (
           <p className="text-xs text-subtitle mt-0.5">
-            {source.files.length} file(s)
+            {source.files.length} arquivo(s)
           </p>
         )}
       </div>
@@ -41,7 +41,7 @@ export function ActivitySourcesTab({ sources = [] }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-icons">
         <FileUp size={40} className="mb-3 opacity-50" />
-        <p className="text-sm">No inputs are attached to this activity yet.</p>
+        <p className="text-sm">Ainda não há entradas anexadas a esta jornada.</p>
       </div>
     );
   }

@@ -22,10 +22,10 @@ import {
 } from "./mockPortalData";
 
 const STATUS_STYLES = {
-  "In Progress": "bg-blue-500/10 text-blue-400 border-blue-500/30",
-  "Completed": "bg-green/10 text-green border-green/30",
-  "Resetting": "bg-salmon/10 text-salmon border-salmon/30",
-  "Planned": "bg-icons/10 text-icons border-icons/30",
+  "Em andamento": "bg-blue-500/10 text-blue-400 border-blue-500/30",
+  Concluída: "bg-green/10 text-green border-green/30",
+  Reajustando: "bg-salmon/10 text-salmon border-salmon/30",
+  Planejada: "bg-icons/10 text-icons border-icons/30",
 };
 
 function StatusBadge({ status }) {
@@ -33,7 +33,7 @@ function StatusBadge({ status }) {
     <span
       className={cn(
         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border",
-        STATUS_STYLES[status] ?? STATUS_STYLES["Planned"]
+        STATUS_STYLES[status] ?? STATUS_STYLES.Planejada
       )}
     >
       {status}
@@ -43,11 +43,7 @@ function StatusBadge({ status }) {
 
 function formatDate(dateStr) {
   if (!dateStr) return "--";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return new Date(dateStr).toLocaleDateString("pt-BR");
 }
 
 export function ActivityDetailDialog({ activity, open, onOpenChange }) {
@@ -93,7 +89,7 @@ export function ActivityDetailDialog({ activity, open, onOpenChange }) {
 
             {totalFindings > 0 && (
               <span className="inline-flex items-center gap-1.5">
-                {totalFindings} friction point{totalFindings !== 1 ? "s" : ""}
+                {totalFindings} ponto{totalFindings !== 1 ? "s" : ""} de atrito
               </span>
             )}
 
@@ -117,25 +113,25 @@ export function ActivityDetailDialog({ activity, open, onOpenChange }) {
           <Tabs defaultValue="sources" className="mt-4">
             <TabsList>
               <TabsTrigger value="sources">
-                Inputs
+                Entradas
                 {sources.length > 0 && (
                   <span className="ml-1.5 text-2xs text-subtitle">({sources.length})</span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="test-plan">
-                Weekly Plan
+                Plano da semana
                 {testCases.length > 0 && (
                   <span className="ml-1.5 text-2xs text-subtitle">({testCases.length})</span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="findings">
-                Wins & Friction
+                Vitórias e atritos
                 {findings.length > 0 && (
                   <span className="ml-1.5 text-2xs text-subtitle">({findings.length})</span>
                 )}
               </TabsTrigger>
               <TabsTrigger value="analysis">
-                Coach Notes
+                Notas do coach
               </TabsTrigger>
             </TabsList>
 

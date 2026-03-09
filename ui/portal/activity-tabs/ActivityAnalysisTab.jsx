@@ -30,8 +30,8 @@ export function ActivityAnalysisTab({ analysis }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-icons">
         <Bot size={40} className="mb-3 opacity-50" />
-        <p className="text-sm">No coach notes are available for this activity yet.</p>
-        <p className="text-xs text-icons mt-1">Coach notes will appear once the activity starts collecting real progress.</p>
+        <p className="text-sm">Ainda não existem notas do coach para esta jornada.</p>
+        <p className="text-xs text-icons mt-1">As notas aparecem quando a jornada começa a acumular progresso real.</p>
       </div>
     );
   }
@@ -40,8 +40,8 @@ export function ActivityAnalysisTab({ analysis }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-icons">
         <Loader2 size={40} className="mb-3 animate-spin text-hAccent" />
-        <p className="text-sm text-title font-medium">Coach review in progress...</p>
-        <p className="text-xs text-subtitle mt-1">We are reading your inputs and progress patterns now. Notes will appear here shortly.</p>
+        <p className="text-sm text-title font-medium">Revisão do coach em andamento...</p>
+        <p className="text-xs text-subtitle mt-1">Estamos lendo suas entradas e padrões de progresso. As notas aparecem aqui em instantes.</p>
       </div>
     );
   }
@@ -51,10 +51,10 @@ export function ActivityAnalysisTab({ analysis }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Bot size={18} className="text-hAccent" />
-          <span className="text-sm font-semibold text-title">Coach Insights</span>
+          <span className="text-sm font-semibold text-title">Insights do coach</span>
         </div>
         <span className="text-xs text-subtitle">
-          Last updated: {new Date(analysis.updatedAt).toLocaleDateString()}
+          Atualizado em: {new Date(analysis.updatedAt).toLocaleDateString("pt-BR")}
         </span>
       </div>
 
@@ -65,7 +65,7 @@ export function ActivityAnalysisTab({ analysis }) {
           ))}
         </div>
       ) : (
-        <p className="text-sm text-icons text-center py-8">No coach notes generated yet.</p>
+        <p className="text-sm text-icons text-center py-8">Nenhuma nota do coach gerada ainda.</p>
       )}
 
       {analysis.provisionalFindings > 0 && (
@@ -73,11 +73,11 @@ export function ActivityAnalysisTab({ analysis }) {
           <div className="flex items-center gap-2">
             <AlertTriangle size={16} className="text-salmon" />
             <span className="text-sm font-medium text-title">
-              {analysis.provisionalFindings} Friction Point{analysis.provisionalFindings > 1 ? "s" : ""} Flagged
+              {analysis.provisionalFindings} ponto{analysis.provisionalFindings > 1 ? "s" : ""} de atrito sinalizado
             </span>
           </div>
           <p className="text-xs text-subtitle mt-1 ml-6">
-            These are early coaching flags that should shape the next smaller step.
+            São alertas iniciais do coach que devem orientar o próximo passo menor.
           </p>
         </div>
       )}

@@ -10,10 +10,10 @@ const SEVERITY_CONFIG = {
 };
 
 const REMEDIATION_CONFIG = {
-  Done: { icon: ShieldCheck, color: "text-green", label: "Done" },
-  "Partly Done": { icon: ShieldQuestion, color: "text-yellow-500", label: "Partly Done" },
-  Planned: { icon: Info, color: "text-lightBlue", label: "Planned" },
-  "Needs Support": { icon: ShieldAlert, color: "text-salmon", label: "Needs Support" },
+  Feito: { icon: ShieldCheck, color: "text-green", label: "Feito" },
+  Parcial: { icon: ShieldQuestion, color: "text-yellow-500", label: "Parcial" },
+  Planejado: { icon: Info, color: "text-lightBlue", label: "Planejado" },
+  "Precisa de apoio": { icon: ShieldAlert, color: "text-salmon", label: "Precisa de apoio" },
 };
 
 function SeverityBadge({ severity }) {
@@ -29,7 +29,7 @@ function RemediationBadge({ state }) {
   if (!state) {
     return <span className="text-2xs text-icons">--</span>;
   }
-  const config = REMEDIATION_CONFIG[state] ?? REMEDIATION_CONFIG["Needs Support"];
+  const config = REMEDIATION_CONFIG[state] ?? REMEDIATION_CONFIG["Precisa de apoio"];
   const Icon = config.icon;
   return (
     <span className={cn("inline-flex items-center gap-1 text-2xs font-medium", config.color)}>
@@ -54,7 +54,7 @@ export function ActivityFindingsTab({ findings = [] }) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-icons">
         <ShieldCheck size={40} className="mb-3 opacity-50" />
-        <p className="text-sm">No wins or friction points for this activity yet.</p>
+        <p className="text-sm">Ainda não há vitórias ou atritos nesta jornada.</p>
       </div>
     );
   }
@@ -80,9 +80,9 @@ export function ActivityFindingsTab({ findings = [] }) {
           <thead>
             <tr className="bg-secondaryCardBackground border-b border-cardStroke">
               <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">ID</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">Priority</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">Pattern</th>
-              <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">Next Step</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">Prioridade</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">Padrão</th>
+              <th className="text-left px-4 py-2.5 text-xs font-semibold text-subtitle uppercase tracking-wider">Próximo passo</th>
             </tr>
           </thead>
           <tbody>

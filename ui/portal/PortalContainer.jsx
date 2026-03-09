@@ -20,78 +20,78 @@ import { Settings, LayoutGrid, Moon, Sun } from "lucide-react";
 import { useTheme } from "../components/ThemeProvider";
 
 const SAMPLE_ASSETS = [
-  { name: "10-Minute Walk Plan", type: "Workout Plan", description: "A simple starter plan built around short daily walks" },
-  { name: "After-Lunch Routine", type: "Routine", description: "A repeatable afternoon cue for getting out of the chair" },
-  { name: "Simple Meal Prep Guide", type: "Meal Guide", description: "Easy meals that support steady energy for movement" },
-  { name: "Evening Wind-Down", type: "Sleep Plan", description: "A low-friction shutdown routine to improve recovery" },
-  { name: "Shoes by the Door", type: "Environment", description: "A tiny environment change that removes morning friction" },
-  { name: "Water Bottle on Desk", type: "Environment", description: "A visible cue that supports movement breaks and hydration" },
-  { name: "Mobility Reset", type: "Workout Plan", description: "A short mobility sequence for stiff afternoons" },
-  { name: "Morning Starter", type: "Routine", description: "A wake-up flow that replaces screen time with movement" },
-  { name: "Hydration Checklist", type: "Checklist", description: "A simple list to support energy and consistency" },
-  { name: "Weekly Calendar Snapshot", type: "Weekly Schedule", description: "A realistic view of where movement blocks can fit" },
-  { name: "Sunday Reflection Notes", type: "Progress Log", description: "A quick weekly review of wins, misses, and momentum" },
-  { name: "Week 1 Coach Review", type: "Activity", description: "A previous coaching review with wins and friction points" },
+  { name: "Caminhada de 10 minutos", type: "Caminhada", description: "Um primeiro hábito simples baseado em caminhadas curtas todos os dias." },
+  { name: "Pós-almoço em movimento", type: "Rotina", description: "Um gatilho leve para sair da cadeira depois do almoço." },
+  { name: "Guia alimentar simples", type: "Guia alimentar", description: "Refeições fáceis que sustentam energia para se movimentar." },
+  { name: "Desligamento da noite", type: "Plano de sono", description: "Uma rotina curta para recuperar melhor e facilitar o dia seguinte." },
+  { name: "Tênis perto da porta", type: "Ambiente", description: "Uma mudança pequena no ambiente que reduz atrito para começar." },
+  { name: "Garrafa visível na mesa", type: "Ambiente", description: "Um lembrete visual que ajuda pausas de movimento e hidratação." },
+  { name: "Reset de mobilidade", type: "Caminhada", description: "Uma sequência curta para tardes travadas ou de pouca energia." },
+  { name: "Começo leve da manhã", type: "Rotina", description: "Um começo de dia que troca tela por movimento simples." },
+  { name: "Checklist de hidratação", type: "Checklist", description: "Uma lista enxuta para sustentar energia e constância." },
+  { name: "Agenda real da semana", type: "Agenda semanal", description: "Uma visão prática de onde os blocos de movimento cabem." },
+  { name: "Notas da semana", type: "Diário", description: "Uma revisão rápida das vitórias, travas e do ritmo da semana." },
+  { name: "Revisão do coach - Semana 1", type: "Jornada", description: "Uma revisão anterior com padrões, vitórias e pontos de atrito." },
 ];
 
 const ASSET_TYPE_ACTIONS = {
-  "Workout Plan": [
-    { label: "Build Week 1 Plan", message: "Yes, build my Week 1 movement plan", toolId: "activation-plan" },
-    { label: "Shrink the Starting Step", message: "Help me shrink the starting step", toolId: "momentum-check" },
-    { label: "Not now", message: "No thanks, not right now" },
+  Caminhada: [
+    { label: "Montar semana 1", message: "Sim, monta minha semana 1 de movimento", toolId: "activation-plan" },
+    { label: "Diminuir o primeiro passo", message: "Me ajuda a diminuir o primeiro passo", toolId: "momentum-check" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Routine": [
-    { label: "Build a Repeatable Routine", message: "Yes, build a repeatable routine from this", toolId: "activation-plan" },
-    { label: "Find My Friction", message: "Find the friction points in this routine", toolId: "momentum-check" },
-    { label: "Not now", message: "No thanks, not right now" },
+  Rotina: [
+    { label: "Criar rotina repetível", message: "Sim, cria uma rotina repetível a partir disso", toolId: "activation-plan" },
+    { label: "Encontrar meus atritos", message: "Encontra os pontos de atrito dessa rotina", toolId: "momentum-check" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Meal Guide": [
-    { label: "Check Energy Support", message: "Yes, check if this supports my energy and movement", toolId: "consistency-check" },
-    { label: "Simplify the Meals", message: "Help me simplify these meals for consistency", toolId: "consistency-check" },
-    { label: "Not now", message: "No thanks, not right now" },
+  "Guia alimentar": [
+    { label: "Checar energia", message: "Sim, vê se isso sustenta minha energia e meu movimento", toolId: "consistency-check" },
+    { label: "Simplificar refeições", message: "Me ajuda a simplificar essas refeições para manter constância", toolId: "consistency-check" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Sleep Plan": [
-    { label: "Build a Sleep Reset", message: "Yes, build a sleep reset from this", toolId: "sleep-reset" },
-    { label: "Reduce Night Friction", message: "Show me where the night routine is too hard", toolId: "sleep-reset" },
-    { label: "Not now", message: "No thanks, not right now" },
+  "Plano de sono": [
+    { label: "Montar reset de sono", message: "Sim, monta um reset de sono a partir disso", toolId: "sleep-reset" },
+    { label: "Reduzir atrito noturno", message: "Me mostra onde a rotina da noite está difícil demais", toolId: "sleep-reset" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Environment": [
-    { label: "Check My Setup", message: "Yes, check whether this setup supports movement", toolId: "momentum-check" },
-    { label: "Suggest Easy Changes", message: "Suggest easy environment changes for consistency", toolId: "momentum-check" },
-    { label: "Not now", message: "No thanks, not right now" },
+  Ambiente: [
+    { label: "Checar meu setup", message: "Sim, checa se esse setup favorece o movimento", toolId: "momentum-check" },
+    { label: "Sugerir mudanças fáceis", message: "Sugere mudanças simples no ambiente para manter constância", toolId: "momentum-check" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Weekly Schedule": [
-    { label: "Find Movement Windows", message: "Yes, find movement windows in this schedule", toolId: "activation-plan" },
-    { label: "Protect My Best Time", message: "Help me protect my best time to move", toolId: "momentum-check" },
-    { label: "Not now", message: "No thanks, not right now" },
+  "Agenda semanal": [
+    { label: "Encontrar janelas", message: "Sim, encontra janelas de movimento nessa agenda", toolId: "activation-plan" },
+    { label: "Proteger meu melhor horário", message: "Me ajuda a proteger meu melhor horário para me mover", toolId: "momentum-check" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Checklist": [
-    { label: "Tighten the Checklist", message: "Yes, tighten this checklist into a daily cue", toolId: "consistency-check" },
-    { label: "Remove Extra Steps", message: "Help me remove extra steps from this checklist", toolId: "consistency-check" },
-    { label: "Not now", message: "No thanks, not right now" },
+  Checklist: [
+    { label: "Enxugar checklist", message: "Sim, enxuga esse checklist até virar um gatilho diário", toolId: "consistency-check" },
+    { label: "Remover etapas extras", message: "Me ajuda a remover etapas extras desse checklist", toolId: "consistency-check" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Progress Log": [
-    { label: "Review My Week", message: "Yes, review my week and show the pattern", toolId: "coach-review" },
-    { label: "Find Small Wins", message: "Show me the small wins in this progress log", toolId: "coach-review" },
-    { label: "Not now", message: "No thanks, not right now" },
+  Diário: [
+    { label: "Revisar minha semana", message: "Sim, revisa minha semana e me mostra o padrão", toolId: "coach-review" },
+    { label: "Achar pequenas vitórias", message: "Me mostra as pequenas vitórias nesse diário", toolId: "coach-review" },
+    { label: "Agora não", message: "Agora não" },
   ],
-  "Activity": [
-    { label: "Review the Check-In", message: "Yes, review the previous coaching check-in", toolId: "coach-review" },
-    { label: "Plan the Next Phase", message: "Plan the next phase from this activity", toolId: "coach-review" },
-    { label: "Not now", message: "No thanks, not right now" },
+  Jornada: [
+    { label: "Revisar check-in", message: "Sim, revisa o check-in anterior do coach", toolId: "coach-review" },
+    { label: "Planejar próxima fase", message: "Planeja a próxima fase a partir dessa jornada", toolId: "coach-review" },
+    { label: "Agora não", message: "Agora não" },
   ],
 };
 
 const ASSET_TYPE_PROMPTS = {
-  "Workout Plan": "Would you like me to turn this into a **simple first-week movement plan**?",
-  "Routine": "Would you like me to **simplify this routine** so it is easier to repeat?",
-  "Meal Guide": "Would you like me to **check whether these meals support your energy and movement**?",
-  "Sleep Plan": "Would you like me to **build a calmer evening reset** from this?",
-  "Environment": "Would you like me to **suggest easy setup changes** that make movement easier to start?",
-  "Weekly Schedule": "Would you like me to **find the best time blocks for movement** in this schedule?",
-  "Checklist": "Would you like me to **trim this checklist into a low-friction daily cue**?",
-  "Progress Log": "Would you like me to **review your week and pull out the pattern**?",
-  "Activity": "Would you like me to **review the wins and friction** from this activity?",
+  Caminhada: "Quer que eu transforme isso em um **plano simples para a primeira semana**?",
+  Rotina: "Quer que eu **simplifique essa rotina** para ela ficar mais repetível?",
+  "Guia alimentar": "Quer que eu **veja se isso sustenta sua energia e seu movimento**?",
+  "Plano de sono": "Quer que eu **monte um reset noturno mais leve** a partir disso?",
+  Ambiente: "Quer que eu **sugira mudanças fáceis no ambiente** para começar a se mover com menos atrito?",
+  "Agenda semanal": "Quer que eu **encontre os melhores blocos de tempo para movimento** nessa agenda?",
+  Checklist: "Quer que eu **enxugue esse checklist até virar um gatilho diário leve**?",
+  Diário: "Quer que eu **revise sua semana e puxe o padrão principal**?",
+  Jornada: "Quer que eu **revise as vitórias e os atritos** dessa jornada?",
 };
 
 export function PortalContainer() {
@@ -105,7 +105,7 @@ export function PortalContainer() {
   const [messages, setMessages] = useState([]);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
   const [rightWidth, setRightWidth] = useState(350);
-  const [dashboardMode, setDashboardMode] = useState("hidden");
+  const [dashboardMode, setDashboardMode] = useState("horizontal");
   const [dashHeight, setDashHeight] = useState(150);
   const [dashWidth, setDashWidth] = useState(200);
   const [isResizing, setIsResizing] = useState(false);
@@ -254,7 +254,7 @@ export function PortalContainer() {
   };
 
   const handleSendMessage = (content, attachedAssets = []) => {
-    const messageContent = content.trim() || `Attached ${attachedAssets.length} resource(s)`;
+    const messageContent = content.trim() || `Anexei ${attachedAssets.length} hábito(s)`;
 
     const newUserMessage = {
       id: Date.now(),
@@ -266,7 +266,7 @@ export function PortalContainer() {
     setMessages((prev) => [...prev, newUserMessage]);
 
     setTimeout(() => {
-      let aiResponseContent = "I received your message. Let's build a path from inactive to active.";
+      let aiResponseContent = "Recebi sua mensagem. Vamos transformar movimento em algo leve, viável e repetível.";
       let aiSuggestedActions = null;
 
       const contentLower = content.toLowerCase();
@@ -298,27 +298,27 @@ export function PortalContainer() {
 
         handleToolTriggered({ toolId });
 
-        aiResponseContent = `Starting **${matchedAction.label}** for **${asset.name}**. You can track the progress in the Guides panel.`;
+        aiResponseContent = `Comecei **${matchedAction.label}** para **${asset.name}**. Você pode acompanhar no painel de **Próximas atividades**.`;
       } else if (matchedRecommendationAction) {
-        aiResponseContent = `Got it. I'll **${matchedRecommendationAction.label.toLowerCase()}** for you. This is being queued now, and you'll see the progress in the Guides panel shortly.`;
-      } else if (content === "No thanks, not right now" || content === "Thanks, I'll handle this manually" || content === "I've noted this advisory, thanks" || content === "I'll add the backup plan later" || content === "Skip for Now") {
+        aiResponseContent = `Perfeito. Vou **${matchedRecommendationAction.label.toLowerCase()}** para você agora, e o progresso vai aparecer no painel de **Próximas atividades**.`;
+      } else if (content === "Agora não" || content === "Valeu, eu resolvo isso manualmente" || content === "Anotado, obrigado" || content === "Depois eu adiciono esse plano B" || content === "Pular por enquanto") {
         lastActionContextRef.current = null;
-        aiResponseContent = "No problem. When you're ready, we can make the next step smaller and easier.";
+        aiResponseContent = "Sem problema. Quando você quiser, a gente deixa o próximo passo ainda menor e mais fácil.";
       } else if (
-        contentLower.includes("inactive to active") ||
-        contentLower.includes("routine") ||
-        contentLower.includes("low-energy")
+        contentLower.includes("sedent") ||
+        contentLower.includes("rotina") ||
+        contentLower.includes("baixa energia")
       ) {
-        aiResponseContent = "Great. Let's start with what your real day looks like.\n\nPlease drag and drop resources below to continue.";
-      } else if (contentLower.includes("resource") && contentLower.includes("added")) {
-        aiResponseContent = "Perfect. Ask me what pattern you want to build from here.";
+        aiResponseContent = "Boa. Vamos começar pelo que seu dia real permite.\n\nArraste hábitos e materiais aqui embaixo para continuar.";
+      } else if (contentLower.includes("hábito") && contentLower.includes("adicionado")) {
+        aiResponseContent = "Perfeito. Agora me diga qual padrão você quer construir primeiro.";
       } else if (attachedAssets.length > 0) {
         const lastAsset = attachedAssets[attachedAssets.length - 1];
         const assetNames = attachedAssets.map((a) => `**${a.name}**`).join(", ");
-        const prompt = ASSET_TYPE_PROMPTS[lastAsset?.type] ?? "What would you like to build from this?";
+        const prompt = ASSET_TYPE_PROMPTS[lastAsset?.type] ?? "O que você quer construir a partir disso?";
         const actions = ASSET_TYPE_ACTIONS[lastAsset?.type] ?? [
-          { label: "Yes", message: "Yes, go ahead" },
-          { label: "No", message: "No thanks, not right now" },
+          { label: "Sim", message: "Sim, pode seguir" },
+          { label: "Agora não", message: "Agora não" },
         ];
 
         attachedAssets.forEach((asset) => {
@@ -331,14 +331,14 @@ export function PortalContainer() {
         });
 
         lastActionContextRef.current = { asset: lastAsset };
-        aiResponseContent = `Got it. I've received ${assetNames}.\n\n${prompt}`;
+        aiResponseContent = `Recebido. Já tenho ${assetNames} comigo.\n\n${prompt}`;
         aiSuggestedActions = actions;
-      } else if (content.toLowerCase().includes("add resource") || content.toLowerCase().includes("here is a resource")) {
+      } else if (content.toLowerCase().includes("adicionar hábito") || content.toLowerCase().includes("aqui está um hábito")) {
         const newAsset = getNextAsset();
         setAssets((prev) => [...prev, newAsset]);
-        aiResponseContent = `I've added **${newAsset.name}** (${newAsset.type}) to your resources. We now have ${assets.length + 1} resource(s) connected.\n\n*${newAsset.description}*`;
+        aiResponseContent = `Adicionei **${newAsset.name}** (${newAsset.type}) aos seus hábitos. Agora temos ${assets.length + 1} hábito(s) conectados.\n\n*${newAsset.description}*`;
       } else if (assets.length === 0) {
-        aiResponseContent = "Could you share a resource first? You can type 'add resource' to simulate one, or drag and drop a routine, note, checklist, or plan right here into the chat.";
+        aiResponseContent = "Você pode me mostrar um hábito ou material primeiro? Digite `adicionar hábito` para simular um, ou arraste uma rotina, checklist, plano ou diário aqui no chat.";
       }
 
       setMessages((prev) => [
@@ -360,16 +360,16 @@ export function PortalContainer() {
     const newUserMessage = {
       id: Date.now(),
       role: "user",
-      content: `Resource **${newAsset.name}** added!`,
+      content: `Hábito **${newAsset.name}** adicionado!`,
       attachedAssets: [],
     };
     setMessages((prev) => [...prev, newUserMessage]);
 
     setTimeout(() => {
-      const prompt = ASSET_TYPE_PROMPTS[newAsset.type] ?? "What would you like to do with this resource?";
+      const prompt = ASSET_TYPE_PROMPTS[newAsset.type] ?? "O que você quer fazer com esse hábito?";
       const actions = ASSET_TYPE_ACTIONS[newAsset.type] ?? [
-        { label: "Yes", message: "Yes, go ahead" },
-        { label: "No", message: "No thanks, not right now" },
+        { label: "Sim", message: "Sim, pode seguir" },
+        { label: "Agora não", message: "Agora não" },
       ];
 
       lastActionContextRef.current = { asset: newAsset };
@@ -379,7 +379,7 @@ export function PortalContainer() {
         {
           id: Date.now() + 1,
           role: "assistant",
-          content: `Great, **${newAsset.name}** is connected.\n\n${prompt}`,
+          content: `Boa. **${newAsset.name}** já está conectado.\n\n${prompt}`,
           suggestedActions: actions,
         },
       ]);
@@ -398,7 +398,7 @@ export function PortalContainer() {
   };
 
   const hasAssets = assets.length > 0;
-  const showCatalog = assets.length >= 3 || toolTaskSpawned;
+  const showCatalog = assets.length > 0 || toolTaskSpawned;
   const showDashboard = dashboardMode !== "hidden";
   const dashboardLayout = dashboardMode === "hidden" ? "horizontal" : dashboardMode;
 
@@ -433,21 +433,21 @@ export function PortalContainer() {
           <button
             onClick={toggleTheme}
             className="p-1.5 rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-            title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
           >
             {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
           <button
             onClick={() => setSettingsOpen(true)}
             className="p-1.5 rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-            title="Progress Widgets"
+            title="Widgets de progresso"
           >
             <Settings size={18} />
           </button>
           <button
             onClick={handleToggleDashboard}
             className="p-1.5 rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-            title="Toggle Board Layout"
+            title="Alternar layout do painel"
           >
             <LayoutGrid size={18} />
           </button>

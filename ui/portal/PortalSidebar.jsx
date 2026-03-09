@@ -55,22 +55,22 @@ import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { MOCK_ORGANIZATIONS, MOCK_USER, MOCK_ACTIVITIES } from "./mockPortalData";
 
 const ASSET_TYPE_ICON_MAP = {
-  "Workout Plan": FileCode,
-  "Routine": AppWindow,
-  "Weekly Schedule": Network,
-  "Meal Guide": ScrollText,
-  "Checklist": ClipboardList,
-  "Environment": Server,
-  "Sleep Plan": Shield,
-  "Progress Log": FileText,
-  "Activity": FileText,
+  Caminhada: FileCode,
+  Rotina: AppWindow,
+  "Agenda semanal": Network,
+  "Guia alimentar": ScrollText,
+  Checklist: ClipboardList,
+  Ambiente: Server,
+  "Plano de sono": Shield,
+  Diário: FileText,
+  Jornada: FileText,
 };
 
 const ACTIVITY_STATUS_COLORS = {
-  "In Progress": "bg-blue-500",
-  "Completed": "bg-green-500",
-  "Resetting": "bg-salmon",
-  "Planned": "bg-icons",
+  "Em andamento": "bg-blue-500",
+  Concluída: "bg-green-500",
+  Reajustando: "bg-salmon",
+  Planejada: "bg-icons",
 };
 
 function getAssetIcon({ type, size = 16 }) {
@@ -156,7 +156,7 @@ function OrgSwitcher() {
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-subtitle">
-              Coaching Spaces
+              Espaços do coach
             </DropdownMenuLabel>
             {MOCK_ORGANIZATIONS.map((org) => (
               <DropdownMenuItem
@@ -241,16 +241,16 @@ function UserFooter() {
             <DropdownMenuSeparator className="bg-cardStroke" />
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <User className="size-4 text-icons" />
-              <span className="text-title">Profile</span>
+              <span className="text-title">Perfil</span>
             </DropdownMenuItem>
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <Settings className="size-4 text-icons" />
-              <span className="text-title">Preferences</span>
+              <span className="text-title">Preferências</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator className="bg-cardStroke" />
             <DropdownMenuItem className="gap-2 cursor-pointer">
               <LogOut className="size-4 text-icons" />
-              <span className="text-title">Log out</span>
+              <span className="text-title">Sair</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -266,7 +266,7 @@ function SidebarToggle() {
     <button
       onClick={toggleSidebar}
       className="p-1.5 hover:bg-cardBackgroundHover rounded-md text-icons hover:text-hAccent transition-colors"
-      title={open ? "Collapse Sidebar" : "Expand Sidebar"}
+      title={open ? "Recolher menu" : "Expandir menu"}
     >
       {open ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
     </button>
@@ -294,18 +294,18 @@ export function PortalSidebar({ assets = [], onAddAsset, onActivityClick }) {
       <SidebarSeparator className="!bg-cardStroke" />
 
       <SidebarContent>
-        {/* Resources section */}
+        {/* Habits section */}
         <Collapsible open={assetsOpen} onOpenChange={setAssetsOpen} className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild className="text-subtitle uppercase text-xs tracking-wider font-semibold">
               <CollapsibleTrigger>
-                Resources
+                Hábitos
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onAddAsset?.();
                   }}
-                  title="Add Resource"
+                  title="Adicionar hábito"
                   className="ml-auto flex size-5 items-center justify-center rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
                 >
                   <Plus className="size-4" />
@@ -318,7 +318,7 @@ export function PortalSidebar({ assets = [], onAddAsset, onActivityClick }) {
                 <SidebarMenu>
                   {assets.length === 0 ? (
                     <li className="px-2 py-4 text-xs text-icons text-center">
-                      No resources connected yet.
+                      Nenhum hábito conectado ainda.
                     </li>
                   ) : (
                     assets.map((asset) => (
@@ -343,12 +343,12 @@ export function PortalSidebar({ assets = [], onAddAsset, onActivityClick }) {
 
         <SidebarSeparator className="!bg-cardStroke" />
 
-        {/* Activities section */}
+        {/* Journeys section */}
         <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen} className="group/collapsible">
           <SidebarGroup>
             <SidebarGroupLabel asChild className="text-subtitle uppercase text-xs tracking-wider font-semibold">
               <CollapsibleTrigger>
-                Activities
+                Jornadas
                 <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
               </CollapsibleTrigger>
             </SidebarGroupLabel>
