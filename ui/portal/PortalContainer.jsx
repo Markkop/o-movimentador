@@ -850,6 +850,7 @@ export function PortalContainer() {
   const [upcomingActivities, setUpcomingActivities] = useState(MOCK_UPCOMING_ACTIVITIES);
   const [activeConversationId, setActiveConversationId] = useState(ONBOARDING_CONVERSATION.id);
   const [hasSeenFirstAssistantResponse, setHasSeenFirstAssistantResponse] = useState(false);
+  const [assistantResponseCount, setAssistantResponseCount] = useState(0);
   const [hasCreatedFirstItem, setHasCreatedFirstItem] = useState(false);
 
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
@@ -979,6 +980,7 @@ export function PortalContainer() {
         [activeConversation.id]: [...(previous[activeConversation.id] ?? []), assistantMessage],
       }));
       setHasSeenFirstAssistantResponse(true);
+      setAssistantResponseCount((previous) => previous + 1);
       updateConversationPreview(activeConversation.id, reply.content.replace(/\n/g, " "));
 
       const followUp = createFollowUpItem({
@@ -1026,6 +1028,7 @@ export function PortalContainer() {
         },
       ],
     }));
+    setAssistantResponseCount((previous) => previous + 1);
     updateConversationPreview(conversationId, detailMessage.replace(/\n/g, " "));
   };
 
@@ -1112,7 +1115,7 @@ export function PortalContainer() {
 
   const showConversationSidebar = hasSeenFirstAssistantResponse;
   const showRightPanel = hasCreatedFirstItem;
-  const showDashboard = showConversationSidebar && dashboardMode !== "hidden";
+  const showDashboard = assistantResponseCount >= 2 && dashboardMode !== "hidden";
   const dashboardLayout = showDashboard ? dashboardMode : "horizontal";
 
   const handleToggleDashboard = () => {

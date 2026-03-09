@@ -64,11 +64,16 @@ export function ChatbotUI({
   const isEmpty = messages.length === 0;
 
   return (
-    <div className="relative flex h-full w-full flex-col bg-navBackground">
+    <div
+      className={cn(
+        "relative flex h-full w-full flex-col bg-navBackground",
+        isEmpty && "justify-center"
+      )}
+    >
       <div
         className={cn(
           "flex flex-1 flex-col overflow-y-auto bg-navBackground p-6 scrollbar-thin",
-          isEmpty && "justify-end"
+          isEmpty && "hidden"
         )}
       >
         <div
