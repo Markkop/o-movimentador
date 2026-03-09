@@ -1,0 +1,167 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  --color-navBackground: #f2fbff;
+  --color-cardBackground: #ffffff;
+  --color-cardBackgroundHover: #eef7fb;
+  --color-secondaryCardBackground: #fbfdff;
+  --color-secondaryCardBackgroundHover: #f1f9fd;
+  --color-cardStroke: #d5e6ee;
+  --color-secondaryCardStroke: #dbe9f0;
+  --color-title: #163243;
+  --color-subtitle: #628092;
+  --color-bodyPrimary: #2b4d60;
+  --color-icons: #7a95a5;
+  --color-hAccent: #2b9cc9;
+  --color-lightBlue: #7ec7e8;
+  --color-black-green: #2f8f69;
+  --color-salmon: #eb7f6a;
+  --color-white-black: #f8fdff;
+  --font-sans: var(--font-secondary-var);
+}
+
+:root {
+  --font-primary: var(--font-primary-var);
+  --font-primary-condensed: var(--font-primary-condensed-var);
+  --font-secondary: var(--font-secondary-var);
+  --sidebar: hsl(0 0% 98%);
+  --sidebar-foreground: hsl(240 5.3% 26.1%);
+  --sidebar-primary: hsl(240 5.9% 10%);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  --sidebar-accent: hsl(240 4.8% 95.9%);
+  --sidebar-accent-foreground: hsl(240 5.9% 10%);
+  --sidebar-border: hsl(220 13% 91%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(circle at top left, rgba(126, 199, 232, 0.18), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(43, 156, 201, 0.12), transparent 24%),
+    #f2fbff;
+  color: #2b4d60;
+}
+
+* {
+  border-color: transparent;
+}
+
+.font-primary {
+  font-family: var(--font-primary), Georgia, serif;
+}
+
+.font-primaryCondensed {
+  font-family: var(--font-primary-condensed), sans-serif;
+}
+
+.font-secondary {
+  font-family: var(--font-secondary), sans-serif;
+}
+
+.text-2xs {
+  font-size: 0.6875rem;
+  line-height: 0.95rem;
+}
+
+.text-3xs {
+  font-size: 0.625rem;
+  line-height: 0.75rem;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(122, 149, 165, 0.45) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(122, 149, 165, 0.35);
+  border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.animate-in.fade-in.slide-in-from-bottom-4 {
+  animation: fade-slide-in 0.45s ease both;
+}
+
+.animate-in.fade-in.zoom-in {
+  animation: fade-zoom-in 0.2s ease both;
+}
+
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+[data-theme="dark"] {
+  --color-navBackground: #0e1b24;
+  --color-cardBackground: #132531;
+  --color-cardBackgroundHover: #173040;
+  --color-secondaryCardBackground: #142733;
+  --color-secondaryCardBackgroundHover: #18303e;
+  --color-cardStroke: #284555;
+  --color-secondaryCardStroke: #274757;
+  --color-title: #e8f6fb;
+  --color-subtitle: #8badbe;
+  --color-bodyPrimary: #c8e0ea;
+  --color-icons: #84a6b6;
+  --color-hAccent: #59c2ed;
+  --color-lightBlue: #7ec7e8;
+  --color-black-green: #67cf9b;
+  --color-salmon: #ff8f79;
+  --color-white-black: #081116;
+}
+
+.dark {
+  --sidebar: hsl(240 5.9% 10%);
+  --sidebar-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-primary: hsl(224.3 76.3% 48%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(240 3.7% 15.9%);
+  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+  --sidebar-border: hsl(240 3.7% 15.9%);
+  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@theme inline {
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
