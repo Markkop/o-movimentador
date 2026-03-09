@@ -14,10 +14,10 @@ import { WIDGET_REGISTRY } from "./widgetRegistry";
 import { renderWidgetContent } from "./WidgetContent";
 
 const CATEGORY_LABELS = {
-  overview: "Visão geral",
-  momentum: "Ritmo",
-  coaching: "Acompanhamento",
-  routine: "Rotina",
+  progress: "Progresso",
+  habits: "Hábitos",
+  tasks: "Tarefas",
+  coach: "Coach",
 };
 
 function groupWidgetsByCategory() {
@@ -73,7 +73,7 @@ export function WidgetSettingsDialog({
               Widgets de progresso
             </DialogTitle>
             <DialogDescription className="text-xs text-subtitle">
-              Escolha um widget para visualizar e fixar no seu painel.
+              Escolha quais cartões entram no dashboard central.
             </DialogDescription>
           </DialogHeader>
 

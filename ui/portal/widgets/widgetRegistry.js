@@ -1,134 +1,115 @@
 import {
-  ShieldAlert,
   Activity,
-  CheckCircle2,
-  AlertTriangle,
-  TrendingUp,
   BarChart3,
-  Eye,
-  ClipboardCheck,
-  Shield,
+  CheckSquare,
+  Clock3,
+  Footprints,
+  Lightbulb,
+  Target,
 } from "lucide-react";
-
-export const TOOL_TO_WIDGET_MAP = {
-  "activation-plan": "today-plan",
-  "consistency-check": "consistency-score",
-  "coach-review": "activity",
-  "sleep-reset": "habit-balance",
-  "momentum-check": "streak-trend",
-};
 
 export const WIDGET_REGISTRY = [
   {
-    id: "consistency-score",
-    name: "Índice de constância",
-    description: "Uma visão rápida de quão estável está seu ciclo de hábitos nesta semana",
-    icon: ShieldAlert,
-    category: "overview",
-    defaultSize: { width: 120, height: 120 },
-    previewColor: "text-salmon",
+    id: "weekly-minutes",
+    name: "Minutos na semana",
+    description: "Meta semanal de minutos com leitura rápida do quanto já foi protegido.",
+    icon: Clock3,
+    category: "progress",
+    defaultSize: { width: 180, height: 150 },
+    previewColor: "text-hAccent",
   },
   {
-    id: "today-plan",
-    name: "Plano de hoje",
-    description: "Suas rotinas ativas e as próximas ações do dia",
+    id: "today-rhythm",
+    name: "Ritmo de hoje",
+    description: "Blocos curtos que mantêm o dia em movimento sem exigir demais.",
     icon: Activity,
-    category: "momentum",
-    defaultSize: { width: 300, height: 140 },
+    category: "progress",
+    defaultSize: { width: 360, height: 180 },
+    previewColor: "text-lightBlue",
+  },
+  {
+    id: "habit-focus",
+    name: "Hábitos em foco",
+    description: "Visão compacta dos hábitos diários e semanais mais importantes.",
+    icon: Footprints,
+    category: "habits",
+    defaultSize: { width: 360, height: 220 },
     previewColor: "text-hAccent",
   },
   {
-    id: "activity",
-    name: "Fase atual",
-    description: "Progresso da sua fase atual de transição para mais movimento",
-    icon: CheckCircle2,
-    category: "coaching",
-    defaultSize: { width: 620, height: 180 },
+    id: "open-tasks",
+    name: "Tarefas abertas",
+    description: "Os próximos ajustes pequenos que destravam sua rotina.",
+    icon: CheckSquare,
+    category: "tasks",
+    defaultSize: { width: 360, height: 220 },
     previewColor: "text-lightBlue",
   },
   {
-    id: "wins",
-    name: "Vitórias e atritos",
-    description: "Bloqueios recentes, vitórias e notas do coach",
-    icon: AlertTriangle,
-    category: "coaching",
-    defaultSize: { width: 400, height: 340 },
-    previewColor: "text-salmon",
-  },
-  {
-    id: "habit-balance",
-    name: "Equilíbrio da rotina",
-    description: "Como movimento, sono, alimentação e recuperação estão se alinhando",
-    icon: ClipboardCheck,
-    category: "routine",
-    defaultSize: { width: 300, height: 180 },
-    previewColor: "text-lightBlue",
-  },
-  {
-    id: "streak-trend",
-    name: "Tendência da sequência",
-    description: "Constância do movimento nas últimas semanas",
+    id: "steps-trend",
+    name: "Passos",
+    description: "Tendência recente dos passos para acompanhar o ritmo sem obsessão.",
     icon: BarChart3,
-    category: "momentum",
-    defaultSize: { width: 400, height: 200 },
-    previewColor: "text-hAccent",
-  },
-  {
-    id: "routine-coverage",
-    name: "Cobertura da rotina",
-    description: "Quantos gatilhos do seu dia já têm um movimento associado",
-    icon: Eye,
-    category: "overview",
-    defaultSize: { width: 300, height: 180 },
+    category: "progress",
+    defaultSize: { width: 420, height: 220 },
     previewColor: "text-black-green",
   },
   {
-    id: "focus-breakdown",
-    name: "Mapa de foco",
-    description: "Onde focar a seguir entre energia, horário e ambiente",
-    icon: Shield,
-    category: "overview",
-    defaultSize: { width: 400, height: 200 },
+    id: "movement-balance",
+    name: "Equilíbrio",
+    description: "Como minutos, passos e pausas estão se apoiando na semana.",
+    icon: Target,
+    category: "progress",
+    defaultSize: { width: 320, height: 180 },
+    previewColor: "text-salmon",
+  },
+  {
+    id: "coach-notes",
+    name: "Notas do coach",
+    description: "Insights curtos que a IA aprendeu sobre você até aqui.",
+    icon: Lightbulb,
+    category: "coach",
+    defaultSize: { width: 440, height: 240 },
     previewColor: "text-salmon",
   },
 ];
 
 export function getWidgetById({ id }) {
-  return WIDGET_REGISTRY.find((w) => w.id === id);
+  return WIDGET_REGISTRY.find((widget) => widget.id === id);
 }
 
-export function getSuggestedWidgetForTool({ toolId }) {
-  const widgetId = TOOL_TO_WIDGET_MAP[toolId];
-  if (!widgetId) return null;
-  return getWidgetById({ id: widgetId });
+export function getSuggestedWidgetForTool() {
+  return null;
 }
 
 export function getDefaultWidgets() {
-  return ["consistency-score", "today-plan", "activity"];
+  return ["weekly-minutes", "habit-focus", "open-tasks"];
 }
 
 export function computeWidgetPositions({ widgetIds }) {
-  const GAP = 20;
-  let x = GAP;
-  let y = GAP;
+  const gap = 20;
+  let x = gap;
+  let y = gap;
   let rowMaxHeight = 0;
   const containerWidth = 1080;
 
-  return widgetIds.map((id) => {
-    const def = getWidgetById({ id });
-    if (!def) return null;
+  return widgetIds
+    .map((id) => {
+      const definition = getWidgetById({ id });
+      if (!definition) return null;
 
-    const { width, height } = def.defaultSize;
+      const { width, height } = definition.defaultSize;
 
-    if (x + width > containerWidth && x > GAP) {
-      x = GAP;
-      y += rowMaxHeight + GAP;
-      rowMaxHeight = 0;
-    }
+      if (x + width > containerWidth && x > gap) {
+        x = gap;
+        y += rowMaxHeight + gap;
+        rowMaxHeight = 0;
+      }
 
-    const pos = { id, x, y, width, height };
-    x += width + GAP;
-    rowMaxHeight = Math.max(rowMaxHeight, height);
-    return pos;
-  }).filter(Boolean);
+      const position = { id, x, y, width, height };
+      x += width + gap;
+      rowMaxHeight = Math.max(rowMaxHeight, height);
+      return position;
+    })
+    .filter(Boolean);
 }

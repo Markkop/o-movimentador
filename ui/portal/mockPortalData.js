@@ -1,7 +1,7 @@
-export const MOCK_ORGANIZATIONS = [
-  { id: "org-1", name: "Movimentador Cloud", plan: "Coach+" },
-  { id: "org-2", name: "Casa em Movimento", plan: "Crescimento" },
-  { id: "org-3", name: "Laboratório de Hábitos", plan: "Inicial" },
+export const MOCK_TEAMS = [
+  { id: "team-1", name: "Time Pessoal", plan: "Cloud" },
+  { id: "team-2", name: "Casa em Movimento", plan: "Compartilhado" },
+  { id: "team-3", name: "Time do Trabalho", plan: "Piloto" },
 ];
 
 export const MOCK_USER = {
@@ -10,207 +10,305 @@ export const MOCK_USER = {
   avatar: null,
 };
 
-const ACTIVITY_STATUSES = {
-  IN_PROGRESS: "Em andamento",
-  COMPLETED: "Concluída",
-  RESETTING: "Reajustando",
-  PLANNED: "Planejada",
-};
-
-const FOCUS_LEVELS = {
-  BLOCKED: "Travado",
-  HIGH: "Alto",
-  MEDIUM: "Médio",
-  LOW: "Baixo",
-  NOTE: "Nota",
-};
-
-const NEXT_STEP_STATES = {
-  DONE: "Feito",
-  PARTLY_DONE: "Parcial",
-  PLANNED: "Planejado",
-  NEEDS_SUPPORT: "Precisa de apoio",
-};
-
-const WEEKLY_PLAN_STATUSES = {
-  DONE: "Feito",
-  IN_PROGRESS: "Em andamento",
-  QUEUED: "Na fila",
-  SKIPPED: "Pulado",
-};
-
-export const MOCK_ACTIVITIES = [
+export const MOCK_CONVERSATIONS = [
   {
-    id: "act-1",
-    name: "Semana 1 da caminhada",
-    slug: "week-1-walk-reset",
-    status: ACTIVITY_STATUSES.IN_PROGRESS,
-    category: "Plano de caminhada",
-    reportName: "Do sofá ao movimento - Semana 1",
-    createdAt: "2026-03-01T00:00:00Z",
-    startDate: "2026-03-03T00:00:00Z",
-    endDate: "2026-03-16T00:00:00Z",
-    findingsBySeverity: { blocked: 1, high: 2, medium: 3, low: 2, note: 2 },
-    leetTags: [{ title: "Caminhada" }, { title: "Baixo atrito" }, { title: "Manhã" }],
+    id: "conv-1",
+    teamId: "team-1",
+    title: "Destravar minha semana",
+    preview: "Vamos começar com blocos curtos e possíveis.",
+    updatedLabel: "Agora",
+    unread: 0,
   },
   {
-    id: "act-2",
-    name: "Rotina de energia da manhã",
-    slug: "morning-energy-routine",
-    status: ACTIVITY_STATUSES.RESETTING,
-    category: "Reset de rotina",
-    reportName: "Revisão da rotina de energia da manhã",
-    createdAt: "2026-02-20T00:00:00Z",
-    startDate: "2026-02-24T00:00:00Z",
-    endDate: "2026-03-20T00:00:00Z",
-    findingsBySeverity: { blocked: 0, high: 2, medium: 2, low: 3, note: 1 },
-    leetTags: [{ title: "Energia" }, { title: "Acordar" }],
+    id: "conv-2",
+    teamId: "team-1",
+    title: "Rotina da manhã",
+    preview: "Seu plano B precisa caber até em dia cansado.",
+    updatedLabel: "Ontem",
+    unread: 2,
   },
   {
-    id: "act-3",
-    name: "Sequência de mobilidade pós-trabalho",
-    slug: "after-work-mobility-streak",
-    status: ACTIVITY_STATUSES.COMPLETED,
-    category: "Plano de mobilidade",
-    reportName: "Resumo da sequência de mobilidade pós-trabalho",
-    createdAt: "2026-01-05T00:00:00Z",
-    startDate: "2026-01-08T00:00:00Z",
-    endDate: "2026-02-18T00:00:00Z",
-    findingsBySeverity: { blocked: 0, high: 1, medium: 2, low: 2, note: 3 },
-    leetTags: [{ title: "Mobilidade" }, { title: "Recuperação" }],
+    id: "conv-3",
+    teamId: "team-1",
+    title: "Passos e pausas",
+    preview: "Faltam 600 passos para a meta leve de hoje.",
+    updatedLabel: "Sáb",
+    unread: 0,
   },
   {
-    id: "act-4",
-    name: "Base de sono e passos",
-    slug: "sleep-and-steps-setup",
-    status: ACTIVITY_STATUSES.PLANNED,
-    category: "Ajuste de estilo de vida",
-    reportName: "Esboço de base de sono e passos",
-    createdAt: "2026-03-06T00:00:00Z",
-    startDate: null,
-    endDate: null,
-    findingsBySeverity: { blocked: 0, high: 0, medium: 0, low: 0, note: 0 },
-    leetTags: [{ title: "Sono" }, { title: "Passos" }, { title: "Base" }],
+    id: "conv-4",
+    teamId: "team-2",
+    title: "Mover mais em casa",
+    preview: "Vamos usar tarefas domésticas como gatilho.",
+    updatedLabel: "Hoje",
+    unread: 0,
   },
   {
-    id: "act-5",
-    name: "Reboot de movimento do fim de semana",
-    slug: "weekend-movement-reboot",
-    status: ACTIVITY_STATUSES.IN_PROGRESS,
-    category: "Plano de fim de semana",
-    reportName: "Check-in do reboot de movimento do fim de semana",
-    createdAt: "2026-02-28T00:00:00Z",
-    startDate: "2026-03-01T00:00:00Z",
-    endDate: "2026-03-29T00:00:00Z",
-    findingsBySeverity: { blocked: 0, high: 1, medium: 2, low: 1, note: 2 },
-    leetTags: [{ title: "Fim de semana" }, { title: "Constância" }],
+    id: "conv-5",
+    teamId: "team-3",
+    title: "Pausas no trabalho",
+    preview: "Você já tem duas janelas boas entre reuniões.",
+    updatedLabel: "Qui",
+    unread: 1,
   },
 ];
 
-export const MOCK_SOURCES = {
-  "act-1": [
-    { id: "src-1", type: "file", name: "Notas atuais de passos", files: ["passos-semana-0.txt"] },
-    { id: "src-2", type: "url", name: "Rota de caminhada do bairro", url: "https://maps.example.com/walk-loop" },
-    { id: "src-3", type: "file", name: "Foto da agenda da manhã", files: ["agenda-manha.png"] },
+export const MOCK_MESSAGES_BY_CONVERSATION = {
+  "conv-1": [],
+  "conv-2": [
+    {
+      id: "m-2",
+      role: "assistant",
+      content:
+        "Sua manhã está ficando mais estável quando a primeira ação é curta.\n\nHoje eu manteria um começo de **4 minutos** e deixaria o celular para depois.",
+    },
+    {
+      id: "m-3",
+      role: "user",
+      content: "Quero uma versão mais leve para dias em que acordo sem energia.",
+    },
+    {
+      id: "m-4",
+      role: "assistant",
+      content:
+        "Fechado. A versão de resgate pode ser só: beber água, alongar 2 minutos e caminhar 3 minutos dentro de casa.",
+      suggestedActions: [
+        {
+          label: "Transformar em tarefa",
+          message: "Transforma essa versão leve em tarefa para amanhã cedo.",
+        },
+      ],
+    },
   ],
-  "act-2": [
-    { id: "src-4", type: "file", name: "Checklist de acordar", files: ["checklist-acordar.md"] },
-    { id: "src-5", type: "url", name: "Alongamento guiado", url: "https://video.example.com/stretch-8min" },
+  "conv-3": [
+    {
+      id: "m-5",
+      role: "assistant",
+      content:
+        "Hoje você já acumulou **3.600 passos**. Falta pouco para bater a meta leve e manter o ritmo da semana.",
+    },
   ],
-  "act-3": [
-    { id: "src-6", type: "file", name: "Rastreador de mobilidade", files: ["sequencia-mobilidade.csv"] },
-    { id: "src-7", type: "url", name: "Timer de pausa da mesa", url: "https://timer.example.com/desk-breaks" },
+  "conv-4": [
+    {
+      id: "m-6",
+      role: "assistant",
+      content:
+        "Se a ideia é mover mais em casa, eu começaria conectando movimento a tarefas que já existem, sem depender de motivação extra.",
+    },
   ],
-  "act-4": [],
-  "act-5": [
-    { id: "src-8", type: "file", name: "Rascunho do plano de fim de semana", files: ["plano-fim-de-semana.md"] },
-    { id: "src-9", type: "url", name: "Playlist para caminhada indoor", url: "https://music.example.com/indoor-walk" },
-  ],
-};
-
-export const MOCK_TEST_CASES = {
-  "act-1": [
-    { id: "plan-1", halIndex: "PLANO-001", title: "Caminhar 10 minutos depois do café", status: WEEKLY_PLAN_STATUSES.DONE },
-    { id: "plan-2", halIndex: "PLANO-002", title: "Deixar o tênis pronto antes de dormir", status: WEEKLY_PLAN_STATUSES.DONE },
-    { id: "plan-3", halIndex: "PLANO-003", title: "Bater 4.000 passos em três dias úteis", status: WEEKLY_PLAN_STATUSES.IN_PROGRESS },
-    { id: "plan-4", halIndex: "PLANO-004", title: "Trocar um bloco extra sentado por uma volta de 5 minutos", status: WEEKLY_PLAN_STATUSES.QUEUED },
-  ],
-  "act-2": [
-    { id: "plan-5", halIndex: "PLANO-005", title: "Beber água até 10 minutos depois de acordar", status: WEEKLY_PLAN_STATUSES.DONE },
-    { id: "plan-6", halIndex: "PLANO-006", title: "Fazer 6 minutos de alongamento antes do celular", status: WEEKLY_PLAN_STATUSES.IN_PROGRESS },
-    { id: "plan-7", halIndex: "PLANO-007", title: "Preparar o café da manhã na noite anterior", status: WEEKLY_PLAN_STATUSES.SKIPPED },
-  ],
-  "act-3": [
-    { id: "plan-8", halIndex: "PLANO-008", title: "Completar três sessões curtas de mobilidade por semana", status: WEEKLY_PLAN_STATUSES.DONE },
-    { id: "plan-9", halIndex: "PLANO-009", title: "Levantar a cada 60 minutos durante o trabalho", status: WEEKLY_PLAN_STATUSES.DONE },
-    { id: "plan-10", halIndex: "PLANO-010", title: "Fechar uma recuperação de 12 minutos na sexta", status: WEEKLY_PLAN_STATUSES.DONE },
-  ],
-  "act-4": [],
-  "act-5": [
-    { id: "plan-11", halIndex: "PLANO-011", title: "Reservar um bloco ao ar livre todo sábado de manhã", status: WEEKLY_PLAN_STATUSES.IN_PROGRESS },
-    { id: "plan-12", halIndex: "PLANO-012", title: "Segurar uma hora sem sofá no domingo à tarde", status: WEEKLY_PLAN_STATUSES.QUEUED },
-    { id: "plan-13", halIndex: "PLANO-013", title: "Preparar uma opção indoor de plano B", status: WEEKLY_PLAN_STATUSES.QUEUED },
-  ],
-};
-
-export const MOCK_FINDINGS = {
-  "act-1": [
-    { id: "fr-1", halIndex: "AT-01", title: "O tênis não está visível pela manhã", severity: FOCUS_LEVELS.BLOCKED, remediationState: NEXT_STEP_STATES.PLANNED },
-    { id: "fr-2", halIndex: "AT-02", title: "O café da manhã está empurrando a caminhada", severity: FOCUS_LEVELS.HIGH, remediationState: NEXT_STEP_STATES.PARTLY_DONE },
-    { id: "fr-3", halIndex: "AT-03", title: "A meta de passos está grande demais para dias de baixa energia", severity: FOCUS_LEVELS.MEDIUM, remediationState: NEXT_STEP_STATES.PLANNED },
-    { id: "fr-4", halIndex: "AT-04", title: "A playlist certa está facilitando o início", severity: FOCUS_LEVELS.NOTE, remediationState: null },
-  ],
-  "act-2": [
-    { id: "fr-5", halIndex: "AT-05", title: "O celular entra antes da rotina começar", severity: FOCUS_LEVELS.HIGH, remediationState: NEXT_STEP_STATES.NEEDS_SUPPORT },
-    { id: "fr-6", halIndex: "AT-06", title: "O tapete de alongamento está guardado longe demais", severity: FOCUS_LEVELS.MEDIUM, remediationState: NEXT_STEP_STATES.PLANNED },
-    { id: "fr-7", halIndex: "AT-07", title: "A posição da garrafa já está funcionando bem", severity: FOCUS_LEVELS.NOTE, remediationState: null },
-  ],
-  "act-3": [
-    { id: "fr-8", halIndex: "AT-08", title: "Reuniões tardias ainda quebram a sequência às vezes", severity: FOCUS_LEVELS.MEDIUM, remediationState: NEXT_STEP_STATES.DONE },
-    { id: "fr-9", halIndex: "AT-09", title: "Uma versão mais curta melhorou a constância", severity: FOCUS_LEVELS.NOTE, remediationState: null },
-  ],
-  "act-4": [],
-  "act-5": [
-    { id: "fr-10", halIndex: "AT-10", title: "O fim de semana está vago demais para proteger tempo de movimento", severity: FOCUS_LEVELS.HIGH, remediationState: NEXT_STEP_STATES.PLANNED },
-    { id: "fr-11", halIndex: "AT-11", title: "Dias chuvosos eliminam a opção padrão", severity: FOCUS_LEVELS.MEDIUM, remediationState: NEXT_STEP_STATES.NEEDS_SUPPORT },
-    { id: "fr-12", halIndex: "AT-12", title: "Um loop de tarefas em pé virou um ótimo plano B", severity: FOCUS_LEVELS.NOTE, remediationState: null },
+  "conv-5": [
+    {
+      id: "m-7",
+      role: "assistant",
+      content:
+        "Seu trabalho tem blocos curtos entre reuniões. A melhor aposta parece ser uma pausa guiada de **3 a 5 minutos**.",
+    },
   ],
 };
 
-export const MOCK_ANALYSIS = {
-  "act-1": {
-    status: "completed",
-    updatedAt: "2026-03-08T00:00:00Z",
-    insights: [
-      { id: "ins-1", title: "Sua manhã precisa de um gatilho mais simples", description: "A caminhada acontece mais quando tênis, meia e rota já estão decididos na noite anterior.", severity: "high" },
-      { id: "ins-2", title: "Você responde bem a vitórias pequenas", description: "As caminhadas curtas estão acontecendo. O próximo passo correto é frequência, não intensidade.", severity: "positive" },
-      { id: "ins-3", title: "Dias de baixa energia pedem uma meta de resgate", description: "Uma caminhada mínima de 5 minutos protege a identidade de alguém ativo nos dias difíceis.", severity: "info" },
-    ],
-    provisionalFindings: 2,
+export const MOCK_HABITS = [
+  {
+    id: "habit-1",
+    teamId: "team-1",
+    name: "Caminhada leve",
+    cadence: "Diário",
+    targetLabel: "12 min",
+    progress: 67,
+    progressLabel: "8 de 12 min",
+    statusLabel: "Faltam 4 min hoje",
   },
-  "act-2": {
-    status: "completed",
-    updatedAt: "2026-03-05T00:00:00Z",
-    insights: [
-      { id: "ins-4", title: "O celular está vencendo a rotina", description: "Os primeiros cinco minutos do dia estão decidindo o fluxo inteiro. Tira o celular de perto da cama.", severity: "high" },
-      { id: "ins-5", title: "O gatilho da hidratação já está firme", description: "Uma ação fácil já está pegando, então ela é um ótimo gancho para o resto da manhã.", severity: "positive" },
-    ],
-    provisionalFindings: 1,
+  {
+    id: "habit-2",
+    teamId: "team-1",
+    name: "Alongar antes da série",
+    cadence: "Diário",
+    targetLabel: "3 min",
+    progress: 100,
+    progressLabel: "3 de 3 min",
+    statusLabel: "Feito hoje",
   },
-  "act-3": {
-    status: "completed",
-    updatedAt: "2026-02-18T00:00:00Z",
-    insights: [
-      { id: "ins-6", title: "Sessões curtas cabem no seu dia real", description: "A constância melhorou quando o plano parou de competir com o fim do expediente.", severity: "positive" },
-      { id: "ins-7", title: "A sequência ainda sofre em dias sobrecarregados", description: "Manter uma opção de 4 minutos protege o hábito quando o trabalho atrasa.", severity: "medium" },
-    ],
-    provisionalFindings: 0,
+  {
+    id: "habit-3",
+    teamId: "team-1",
+    name: "Bloco ativo de sábado",
+    cadence: "Semanal",
+    targetLabel: "30 min",
+    progress: 35,
+    progressLabel: "11 de 30 min",
+    statusLabel: "Próximo bloco no sábado",
   },
-  "act-4": null,
-  "act-5": {
-    status: "in_progress",
-    updatedAt: "2026-03-09T00:00:00Z",
-    insights: [],
-    provisionalFindings: 0,
+  {
+    id: "habit-4",
+    teamId: "team-2",
+    name: "Subir escadas em casa",
+    cadence: "Diário",
+    targetLabel: "5 min",
+    progress: 40,
+    progressLabel: "2 de 5 min",
+    statusLabel: "Ainda cabe hoje",
   },
+  {
+    id: "habit-5",
+    teamId: "team-3",
+    name: "Pausa entre reuniões",
+    cadence: "Diário",
+    targetLabel: "4 pausas",
+    progress: 50,
+    progressLabel: "2 de 4 pausas",
+    statusLabel: "Duas pausas restantes",
+  },
+];
+
+export const MOCK_TASKS = [
+  {
+    id: "task-1",
+    teamId: "team-1",
+    title: "Separar tênis antes de dormir",
+    description: "Deixar visível reduz o atrito da caminhada de amanhã.",
+    whenLabel: "Hoje, 21:30",
+    status: "Hoje",
+    linkedConversationId: "conv-1",
+  },
+  {
+    id: "task-2",
+    teamId: "team-1",
+    title: "Escolher plano B indoor",
+    description: "Definir uma versão curta para dias corridos ou de chuva.",
+    whenLabel: "Amanhã",
+    status: "Próxima",
+    linkedConversationId: "conv-2",
+  },
+  {
+    id: "task-3",
+    teamId: "team-1",
+    title: "Fechar meta leve de passos",
+    description: "Mais 600 passos resolvem a meta do dia.",
+    whenLabel: "Hoje",
+    status: "Hoje",
+    linkedConversationId: "conv-3",
+  },
+  {
+    id: "task-4",
+    teamId: "team-2",
+    title: "Definir circuito da sala",
+    description: "Dois pontos da casa já bastam para começar.",
+    whenLabel: "Hoje",
+    status: "Hoje",
+    linkedConversationId: "conv-4",
+  },
+  {
+    id: "task-5",
+    teamId: "team-3",
+    title: "Bloquear pausa pós-almoço",
+    description: "Reservar 5 minutos antes da próxima reunião.",
+    whenLabel: "Hoje, 14:00",
+    status: "Hoje",
+    linkedConversationId: "conv-5",
+  },
+];
+
+export const MOCK_UPCOMING_ACTIVITIES = [
+  {
+    id: "next-1",
+    teamId: "team-1",
+    type: "habit",
+    title: "Caminhada leve",
+    description: "Faltam 4 minutos para fechar o hábito de hoje.",
+    meta: "8/12 min",
+    whenLabel: "Hoje",
+    linkedConversationId: "conv-1",
+  },
+  {
+    id: "next-2",
+    teamId: "team-1",
+    type: "task",
+    title: "Separar tênis antes de dormir",
+    description: "Se isso ficar pronto hoje, amanhã começa mais fácil.",
+    meta: "Tarefa rápida",
+    whenLabel: "21:30",
+    linkedConversationId: "conv-1",
+  },
+  {
+    id: "next-3",
+    teamId: "team-1",
+    type: "insight",
+    title: "Coach detectou um padrão",
+    description: "Sua constância sobe quando a meta fica abaixo de 15 minutos.",
+    meta: "Novo insight",
+    whenLabel: "Agora",
+    linkedConversationId: "conv-2",
+  },
+  {
+    id: "next-4",
+    teamId: "team-1",
+    type: "task",
+    title: "Fechar meta leve de passos",
+    description: "Mais 600 passos e o dia fecha no verde.",
+    meta: "600 passos",
+    whenLabel: "Hoje",
+    linkedConversationId: "conv-3",
+  },
+  {
+    id: "next-5",
+    teamId: "team-2",
+    type: "habit",
+    title: "Subir escadas em casa",
+    description: "Dois minutos já protegem o hábito da casa.",
+    meta: "2/5 min",
+    whenLabel: "Hoje",
+    linkedConversationId: "conv-4",
+  },
+  {
+    id: "next-6",
+    teamId: "team-3",
+    type: "insight",
+    title: "Janela boa entre reuniões",
+    description: "Seu melhor espaço para pausa está entre 13:00 e 13:20.",
+    meta: "IA",
+    whenLabel: "Hoje",
+    linkedConversationId: "conv-5",
+  },
+];
+
+export const MOVEMENT_WIDGET_SUMMARY = {
+  weeklyMinutes: {
+    completed: 86,
+    target: 150,
+    delta: "+18",
+  },
+  todayRhythm: [
+    { label: "Manhã", value: "4 min", detail: "alongamento leve" },
+    { label: "Almoço", value: "8 min", detail: "caminhada curta" },
+    { label: "Noite", value: "3 min", detail: "mobilidade em casa" },
+  ],
+  habits: [
+    { name: "Caminhada leve", progress: 67, label: "8/12 min" },
+    { name: "Alongar antes da série", progress: 100, label: "feito" },
+    { name: "Bloco ativo de sábado", progress: 35, label: "11/30 min" },
+  ],
+  tasks: [
+    { title: "Separar tênis antes de dormir", status: "Hoje" },
+    { title: "Escolher plano B indoor", status: "Amanhã" },
+    { title: "Fechar meta leve de passos", status: "Hoje" },
+  ],
+  stepsTrend: [3100, 4200, 3900, 5100, 4800, 5600, 6200],
+  coachNotes: [
+    "Você responde melhor a metas curtas em minutos.",
+    "O plano da manhã ainda depende demais de energia alta.",
+    "Seu plano B ficou mais importante do que subir intensidade agora.",
+  ],
+  balance: [
+    { label: "Minutos", score: 57, color: "bg-hAccent" },
+    { label: "Passos", score: 63, color: "bg-lightBlue" },
+    { label: "Pausas", score: 48, color: "bg-black-green" },
+  ],
+  consistency: [
+    { label: "Seg", active: true },
+    { label: "Ter", active: true },
+    { label: "Qua", active: false },
+    { label: "Qui", active: true },
+    { label: "Sex", active: true },
+    { label: "Sáb", active: false },
+    { label: "Dom", active: true },
+  ],
 };

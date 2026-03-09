@@ -1,191 +1,449 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { ChatbotUI } from "./ChatbotUI";
 import { CatalogPanel } from "./CatalogPanel";
 import { DashboardCanva } from "./DashboardCanva";
 import { WidgetSettingsDialog } from "./widgets/WidgetSettingsDialog";
 import { PortalSidebar } from "./PortalSidebar";
-import { ActivityDetailDialog } from "./ActivityDetailDialog";
 import { SidebarProvider } from "../components/ui/sidebar";
-import {
-  getDefaultWidgets,
-  computeWidgetPositions,
-  getSuggestedWidgetForTool,
-} from "./widgets/widgetRegistry";
-import { getActiveRecommendations, RECOMMENDATIONS } from "./recommendations";
+import { computeWidgetPositions, getDefaultWidgets } from "./widgets/widgetRegistry";
 import { cn } from "../lib/utils";
-import { Settings, LayoutGrid, Moon, Sun } from "lucide-react";
+import { LayoutGrid, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "../components/ThemeProvider";
+import {
+  MOCK_CONVERSATIONS,
+  MOCK_HABITS,
+  MOCK_MESSAGES_BY_CONVERSATION,
+  MOCK_TASKS,
+  MOCK_TEAMS,
+  MOCK_UPCOMING_ACTIVITIES,
+} from "./mockPortalData";
 
-const SAMPLE_ASSETS = [
-  { name: "Caminhada de 10 minutos", type: "Caminhada", description: "Um primeiro hábito simples baseado em caminhadas curtas todos os dias." },
-  { name: "Pós-almoço em movimento", type: "Rotina", description: "Um gatilho leve para sair da cadeira depois do almoço." },
-  { name: "Guia alimentar simples", type: "Guia alimentar", description: "Refeições fáceis que sustentam energia para se movimentar." },
-  { name: "Desligamento da noite", type: "Plano de sono", description: "Uma rotina curta para recuperar melhor e facilitar o dia seguinte." },
-  { name: "Tênis perto da porta", type: "Ambiente", description: "Uma mudança pequena no ambiente que reduz atrito para começar." },
-  { name: "Garrafa visível na mesa", type: "Ambiente", description: "Um lembrete visual que ajuda pausas de movimento e hidratação." },
-  { name: "Reset de mobilidade", type: "Caminhada", description: "Uma sequência curta para tardes travadas ou de pouca energia." },
-  { name: "Começo leve da manhã", type: "Rotina", description: "Um começo de dia que troca tela por movimento simples." },
-  { name: "Checklist de hidratação", type: "Checklist", description: "Uma lista enxuta para sustentar energia e constância." },
-  { name: "Agenda real da semana", type: "Agenda semanal", description: "Uma visão prática de onde os blocos de movimento cabem." },
-  { name: "Notas da semana", type: "Diário", description: "Uma revisão rápida das vitórias, travas e do ritmo da semana." },
-  { name: "Revisão do coach - Semana 1", type: "Jornada", description: "Uma revisão anterior com padrões, vitórias e pontos de atrito." },
-];
+function buildCoachReply(content, context = {}) {
+  const lower = content.toLowerCase();
+  const topHabit = context.teamHabits?.[0];
+  const topTask = context.teamTasks?.[0];
+  const activityCount = context.teamActivities?.length ?? 0;
 
-const ASSET_TYPE_ACTIONS = {
-  Caminhada: [
-    { label: "Montar semana 1", message: "Sim, monta minha semana 1 de movimento", toolId: "activation-plan" },
-    { label: "Diminuir o primeiro passo", message: "Me ajuda a diminuir o primeiro passo", toolId: "momentum-check" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  Rotina: [
-    { label: "Criar rotina repetível", message: "Sim, cria uma rotina repetível a partir disso", toolId: "activation-plan" },
-    { label: "Encontrar meus atritos", message: "Encontra os pontos de atrito dessa rotina", toolId: "momentum-check" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  "Guia alimentar": [
-    { label: "Checar energia", message: "Sim, vê se isso sustenta minha energia e meu movimento", toolId: "consistency-check" },
-    { label: "Simplificar refeições", message: "Me ajuda a simplificar essas refeições para manter constância", toolId: "consistency-check" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  "Plano de sono": [
-    { label: "Montar reset de sono", message: "Sim, monta um reset de sono a partir disso", toolId: "sleep-reset" },
-    { label: "Reduzir atrito noturno", message: "Me mostra onde a rotina da noite está difícil demais", toolId: "sleep-reset" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  Ambiente: [
-    { label: "Checar meu setup", message: "Sim, checa se esse setup favorece o movimento", toolId: "momentum-check" },
-    { label: "Sugerir mudanças fáceis", message: "Sugere mudanças simples no ambiente para manter constância", toolId: "momentum-check" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  "Agenda semanal": [
-    { label: "Encontrar janelas", message: "Sim, encontra janelas de movimento nessa agenda", toolId: "activation-plan" },
-    { label: "Proteger meu melhor horário", message: "Me ajuda a proteger meu melhor horário para me mover", toolId: "momentum-check" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  Checklist: [
-    { label: "Enxugar checklist", message: "Sim, enxuga esse checklist até virar um gatilho diário", toolId: "consistency-check" },
-    { label: "Remover etapas extras", message: "Me ajuda a remover etapas extras desse checklist", toolId: "consistency-check" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  Diário: [
-    { label: "Revisar minha semana", message: "Sim, revisa minha semana e me mostra o padrão", toolId: "coach-review" },
-    { label: "Achar pequenas vitórias", message: "Me mostra as pequenas vitórias nesse diário", toolId: "coach-review" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-  Jornada: [
-    { label: "Revisar check-in", message: "Sim, revisa o check-in anterior do coach", toolId: "coach-review" },
-    { label: "Planejar próxima fase", message: "Planeja a próxima fase a partir dessa jornada", toolId: "coach-review" },
-    { label: "Agora não", message: "Agora não" },
-  ],
-};
+  if (lower.includes("visão geral") || lower.includes("visao geral")) {
+    return {
+      content: `Hoje seu quadro está assim:\n\n- **${context.teamHabits?.length ?? 0} hábitos ativos**\n- **${context.teamTasks?.length ?? 0} tarefas abertas**\n- **${activityCount} próximas atividades**\n\nSeu foco principal agora é **${topHabit?.name ?? "movimento diário leve"}** (${topHabit?.progressLabel ?? "em progresso"}) e a tarefa mais relevante é **${topTask?.title ?? "definir o próximo passo"}**.`,
+      suggestedActions: [
+        {
+          label: "Abrir foco principal",
+          message: `Quero focar em ${topHabit?.name ?? "meu hábito principal"} agora.`,
+        },
+        {
+          label: "Revisar tarefa mais importante",
+          message: `Quero revisar a tarefa ${topTask?.title ?? "mais importante"} agora.`,
+        },
+      ],
+    };
+  }
 
-const ASSET_TYPE_PROMPTS = {
-  Caminhada: "Quer que eu transforme isso em um **plano simples para a primeira semana**?",
-  Rotina: "Quer que eu **simplifique essa rotina** para ela ficar mais repetível?",
-  "Guia alimentar": "Quer que eu **veja se isso sustenta sua energia e seu movimento**?",
-  "Plano de sono": "Quer que eu **monte um reset noturno mais leve** a partir disso?",
-  Ambiente: "Quer que eu **sugira mudanças fáceis no ambiente** para começar a se mover com menos atrito?",
-  "Agenda semanal": "Quer que eu **encontre os melhores blocos de tempo para movimento** nessa agenda?",
-  Checklist: "Quer que eu **enxugue esse checklist até virar um gatilho diário leve**?",
-  Diário: "Quer que eu **revise sua semana e puxe o padrão principal**?",
-  Jornada: "Quer que eu **revise as vitórias e os atritos** dessa jornada?",
-};
+  if (lower.includes("desafiar")) {
+    return {
+      content: `Se a ideia é subir um degrau sem quebrar a constância, eu faria um ajuste pequeno:\n\n- **${topHabit?.name ?? "Hábito principal"}** pode subir de ${topHabit?.targetLabel ?? "10 min"} para **${context.challengeTarget ?? "15 min"}** em só um ou dois dias da semana.\n- **${topTask?.title ?? "Sua tarefa atual"}** pode ganhar um passo extra, mas ainda curto.\n\nA lógica é ficar só um pouco mais difícil, não virar outra vida.`,
+      suggestedActions: [
+        {
+          label: "Aplicar desafio leve",
+          message: "Aplica um desafio leve no meu plano atual.",
+        },
+        {
+          label: "Ajustar só um hábito",
+          message: `Quero ajustar só o hábito ${topHabit?.name ?? "principal"}.`,
+        },
+      ],
+    };
+  }
+
+  if (lower.includes("pouco tempo") || lower.includes("corrido")) {
+    return {
+      content:
+        "Se hoje está corrido, a melhor jogada é proteger um bloco pequeno.\n\nEu faria assim:\n1. Escolha **6 minutos**.\n2. Prenda esse bloco a algo fixo do dia.\n3. Deixe pronta uma versão de resgate de **2 minutos**.\n\nQuer que eu crie isso como tarefa de hoje?",
+      suggestedActions: [
+        {
+          label: "Criar tarefa de hoje",
+          message: "Cria uma tarefa leve para hoje.",
+        },
+        {
+          label: "Versão de resgate",
+          message: "Cria uma versão de resgate de 2 minutos.",
+        },
+      ],
+    };
+  }
+
+  if (lower.includes("semana")) {
+    return {
+      content:
+        "Boa. Para sua semana, eu manteria só três âncoras: um bloco curto na manhã, uma caminhada leve em um dia útil e um bloco semanal um pouco maior.\n\nTudo medido em minutos, sem inventar moda.",
+      suggestedActions: [
+        {
+          label: "Fechar plano da semana",
+          message: "Fecha um plano de semana leve para mim.",
+        },
+      ],
+    };
+  }
+
+  if (lower.includes("parado") || lower.includes("sedent")) {
+    return {
+      content:
+        "Se a sensação é de estar muito parado, o primeiro objetivo não é intensidade. É só começar a se mover com frequência suficiente para o corpo e a rotina pararem de resistir.\n\nEu começaria com **um hábito diário de 8 a 12 minutos** e um **plano B de 2 a 3 minutos**.",
+      suggestedActions: [
+        {
+          label: "Criar hábito diário",
+          message: "Cria um hábito diário leve de movimento para mim.",
+        },
+      ],
+    };
+  }
+
+  if (lower.includes("passo")) {
+    return {
+      content:
+        "Passos são uma boa métrica de base porque deixam o progresso visível sem te prender a treino formal.\n\nHoje eu usaria isso de forma simples: bater uma meta leve, repetir por alguns dias e só depois subir.",
+      suggestedActions: [
+        {
+          label: "Ajustar meta de passos",
+          message: "Me ajuda a ajustar uma meta leve de passos.",
+        },
+      ],
+    };
+  }
+
+  return {
+    content:
+      "Faz sentido. Vamos destravar isso sem pressa e sem depender de motivação alta.\n\nMe diga se o problema maior hoje é **tempo**, **energia**, **dor de começar** ou **falta de rotina**.",
+  };
+}
+
+function createFollowUpItem({ message, teamId, linkedConversationId }) {
+  const lower = message.toLowerCase();
+  const now = Date.now();
+
+  if (lower.includes("tarefa")) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Bloco leve de movimento",
+        description: "Reservar 6 minutos ainda hoje para não perder o ritmo.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "task",
+        title: "Bloco leve de movimento",
+        description: "Um bloco curto já resolve o próximo passo de hoje.",
+        meta: "6 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (lower.includes("resgate")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Plano B de resgate",
+        cadence: "Diário",
+        targetLabel: "2 min",
+        progress: 0,
+        progressLabel: "0 de 2 min",
+        statusLabel: "Pronto para usar em dia difícil",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Plano B de resgate",
+        description: "Deixar um movimento de 2 minutos pronto protege a constância.",
+        meta: "2 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (lower.includes("plano de semana")) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Revisar semana leve",
+        description: "Fechar três blocos possíveis e um plano B simples.",
+        whenLabel: "Hoje",
+        status: "Hoje",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "insight",
+        title: "Semana leve pronta para revisão",
+        description: "A IA organizou um plano inicial com metas em minutos.",
+        meta: "Novo insight",
+        whenLabel: "Agora",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (lower.includes("hábito diário")) {
+    return {
+      habit: {
+        id: `habit-${now}`,
+        teamId,
+        name: "Movimento diário leve",
+        cadence: "Diário",
+        targetLabel: "10 min",
+        progress: 0,
+        progressLabel: "0 de 10 min",
+        statusLabel: "Começa hoje",
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "habit",
+        title: "Movimento diário leve",
+        description: "Primeiro hábito criado com meta enxuta em minutos.",
+        meta: "10 min",
+        whenLabel: "Hoje",
+        linkedConversationId,
+      },
+    };
+  }
+
+  if (lower.includes("desafio leve") || lower.includes("ajustar só o hábito")) {
+    return {
+      task: {
+        id: `task-${now}`,
+        teamId,
+        title: "Testar versão um pouco mais forte",
+        description: "Subir só 3 minutos no hábito principal em um dia da semana.",
+        whenLabel: "Esta semana",
+        status: "Novo",
+        linkedConversationId,
+      },
+      activity: {
+        id: `next-${now}`,
+        teamId,
+        type: "insight",
+        title: "Desafio leve sugerido",
+        description: "A IA propôs aumentar o hábito principal de forma controlada.",
+        meta: "+3 min",
+        whenLabel: "Agora",
+        linkedConversationId,
+      },
+    };
+  }
+
+  return null;
+}
 
 export function PortalContainer() {
   const { theme, toggleTheme } = useTheme();
-  const searchParams = useSearchParams();
-  const recommendationParam = searchParams.get("recommendation");
-  const activeRecommendations = getActiveRecommendations({ recommendationParam });
-  const [dismissedRecommendations, setDismissedRecommendations] = useState([]);
 
-  const [assets, setAssets] = useState([]);
-  const [messages, setMessages] = useState([]);
+  const [activeTeamId, setActiveTeamId] = useState(MOCK_TEAMS[0].id);
+  const [conversations, setConversations] = useState(MOCK_CONVERSATIONS);
+  const [messagesByConversation, setMessagesByConversation] = useState(MOCK_MESSAGES_BY_CONVERSATION);
+  const [habits, setHabits] = useState(MOCK_HABITS);
+  const [tasks, setTasks] = useState(MOCK_TASKS);
+  const [upcomingActivities, setUpcomingActivities] = useState(MOCK_UPCOMING_ACTIVITIES);
+  const [activeConversationId, setActiveConversationId] = useState(MOCK_CONVERSATIONS[0].id);
+
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-  const [rightWidth, setRightWidth] = useState(350);
+  const [rightWidth, setRightWidth] = useState(360);
   const [dashboardMode, setDashboardMode] = useState("horizontal");
-  const [dashHeight, setDashHeight] = useState(150);
-  const [dashWidth, setDashWidth] = useState(200);
+  const [dashHeight, setDashHeight] = useState(180);
+  const [dashWidth, setDashWidth] = useState(360);
   const [isResizing, setIsResizing] = useState(false);
-  const [toolTaskSpawned, setToolTaskSpawned] = useState(false);
 
-  const [selectedActivity, setSelectedActivity] = useState(null);
-  const [activityDialogOpen, setActivityDialogOpen] = useState(false);
-
-  // Widget state
   const [activeWidgetIds, setActiveWidgetIds] = useState(getDefaultWidgets());
   const [widgetCards, setWidgetCards] = useState(() =>
     computeWidgetPositions({ widgetIds: getDefaultWidgets() })
   );
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [suggestedWidgetId, setSuggestedWidgetId] = useState(null);
 
-  const assetIndexRef = useRef(0);
   const isResizingRef = useRef(false);
-  const catalogRef = useRef(null);
-  const lastActionContextRef = useRef(null);
 
-  const getNextAsset = () => {
-    const sample = SAMPLE_ASSETS[assetIndexRef.current % SAMPLE_ASSETS.length];
-    assetIndexRef.current += 1;
-    return { id: Date.now(), ...sample, checked: true };
+  const visibleConversations = conversations.filter(
+    (conversation) => conversation.teamId === activeTeamId
+  );
+
+  useEffect(() => {
+    if (!visibleConversations.some((conversation) => conversation.id === activeConversationId)) {
+      setActiveConversationId(visibleConversations[0]?.id ?? null);
+    }
+  }, [activeConversationId, visibleConversations]);
+
+  const activeConversation =
+    conversations.find((conversation) => conversation.id === activeConversationId) ??
+    visibleConversations[0] ??
+    null;
+  const activeTeam =
+    MOCK_TEAMS.find((team) => team.id === activeTeamId) ?? MOCK_TEAMS[0];
+  const messages = activeConversation
+    ? messagesByConversation[activeConversation.id] ?? []
+    : [];
+  const teamHabits = habits.filter((habit) => habit.teamId === activeTeamId);
+  const teamTasks = tasks.filter((task) => task.teamId === activeTeamId);
+  const teamActivities = upcomingActivities.filter((activity) => activity.teamId === activeTeamId);
+
+  const handleToggleWidget = ({ widgetId }) => {
+    setActiveWidgetIds((previous) => {
+      const isActive = previous.includes(widgetId);
+      const next = isActive
+        ? previous.filter((id) => id !== widgetId)
+        : [...previous, widgetId];
+      setWidgetCards(computeWidgetPositions({ widgetIds: next }));
+      return next;
+    });
   };
 
-  // Widget management
-  const handleToggleWidget = useCallback(({ widgetId }) => {
-    setActiveWidgetIds((prev) => {
-      const isActive = prev.includes(widgetId);
-      const next = isActive ? prev.filter((id) => id !== widgetId) : [...prev, widgetId];
+  const handleRemoveWidget = (widgetId) => {
+    setActiveWidgetIds((previous) => {
+      const next = previous.filter((id) => id !== widgetId);
       setWidgetCards(computeWidgetPositions({ widgetIds: next }));
       return next;
     });
-    if (widgetId === suggestedWidgetId) {
-      setSuggestedWidgetId(null);
-    }
-  }, [suggestedWidgetId]);
+  };
 
-  const handleRemoveWidget = useCallback((widgetId) => {
-    setActiveWidgetIds((prev) => {
-      const next = prev.filter((id) => id !== widgetId);
-      setWidgetCards(computeWidgetPositions({ widgetIds: next }));
-      return next;
-    });
-  }, []);
-
-  const handleUpdateCard = useCallback((id, newProps) => {
-    setWidgetCards((prev) =>
-      prev.map((card) => (card.id === id ? { ...card, ...newProps } : card))
+  const handleUpdateCard = (id, newProps) => {
+    setWidgetCards((previous) =>
+      previous.map((card) => (card.id === id ? { ...card, ...newProps } : card))
     );
-  }, []);
+  };
 
-  const handleDismissSuggestion = useCallback(() => {
-    setSuggestedWidgetId(null);
-  }, []);
+  const updateConversationPreview = (conversationId, preview) => {
+    setConversations((previous) =>
+      previous.map((conversation) =>
+        conversation.id === conversationId
+          ? { ...conversation, preview, updatedLabel: "Agora", unread: 0 }
+          : conversation
+      )
+    );
+  };
 
-  const handleToolTriggered = useCallback(({ toolId }) => {
-    const suggested = getSuggestedWidgetForTool({ toolId });
-    if (suggested && !activeWidgetIds.includes(suggested.id)) {
-      setSuggestedWidgetId(suggested.id);
-    }
-  }, [activeWidgetIds]);
+  const handleSendMessage = (content) => {
+    if (!activeConversation) return;
+
+    const userMessage = {
+      id: Date.now(),
+      role: "user",
+      content,
+    };
+
+    setMessagesByConversation((previous) => ({
+      ...previous,
+      [activeConversation.id]: [...(previous[activeConversation.id] ?? []), userMessage],
+    }));
+    updateConversationPreview(activeConversation.id, content);
+
+    setTimeout(() => {
+      const reply = buildCoachReply(content, {
+        teamHabits,
+        teamTasks,
+        teamActivities,
+        challengeTarget: "15 min",
+      });
+      const assistantMessage = {
+        id: Date.now() + 1,
+        role: "assistant",
+        content: reply.content,
+        ...(reply.suggestedActions ? { suggestedActions: reply.suggestedActions } : {}),
+      };
+
+      setMessagesByConversation((previous) => ({
+        ...previous,
+        [activeConversation.id]: [...(previous[activeConversation.id] ?? []), assistantMessage],
+      }));
+      updateConversationPreview(activeConversation.id, reply.content.replace(/\n/g, " "));
+
+      const followUp = createFollowUpItem({
+        message: content,
+        teamId: activeTeamId,
+        linkedConversationId: activeConversation.id,
+      });
+
+      if (followUp?.habit) {
+        setHabits((previous) => [followUp.habit, ...previous]);
+      }
+      if (followUp?.task) {
+        setTasks((previous) => [followUp.task, ...previous]);
+      }
+      if (followUp?.activity) {
+        setUpcomingActivities((previous) => [followUp.activity, ...previous]);
+      }
+    }, 700);
+  };
 
   const handleActivityClick = (activity) => {
-    setSelectedActivity(activity);
-    setActivityDialogOpen(true);
+    const conversationId = activity.linkedConversationId ?? activeConversationId;
+    if (conversationId) {
+      setActiveConversationId(conversationId);
+    }
+
+    const detailMessage =
+      activity.type === "insight"
+        ? `Abri o insight **${activity.title}**.\n\n${activity.description}`
+        : `Vamos agir em **${activity.title}**.\n\n${activity.description}`;
+
+    setMessagesByConversation((previous) => ({
+      ...previous,
+      [conversationId]: [
+        ...(previous[conversationId] ?? []),
+        {
+          id: Date.now(),
+          role: "assistant",
+          content: detailMessage,
+        },
+      ],
+    }));
+    updateConversationPreview(conversationId, detailMessage.replace(/\n/g, " "));
   };
 
-  const startResizing = (e, target) => {
-    e.preventDefault();
+  const handleNewConversation = () => {
+    const id = `conv-${Date.now()}`;
+    const newConversation = {
+      id,
+      teamId: activeTeamId,
+      title: "Nova conversa",
+      preview: "Conte como está sua rotina hoje.",
+      updatedLabel: "Agora",
+      unread: 0,
+    };
+
+    setConversations((previous) => [newConversation, ...previous]);
+    setMessagesByConversation((previous) => ({
+      ...previous,
+      [id]: [
+        {
+          id: `welcome-${Date.now()}`,
+          role: "assistant",
+          content:
+            "Me conta como está seu dia e eu monto o próximo passo sem te encher de perguntas.",
+        },
+      ],
+    }));
+    setActiveConversationId(id);
+  };
+
+  const startResizing = (event, target) => {
+    event.preventDefault();
     isResizingRef.current = target;
     setIsResizing(target);
-    const startPos = target === "horizontal" ? e.clientY : e.clientX;
-
-    let startSize;
-    if (target === "horizontal") startSize = dashHeight;
-    else if (target === "vertical") startSize = dashWidth;
-    else if (target === "right") startSize = rightWidth;
+    const startPos = target === "horizontal" ? event.clientY : event.clientX;
+    const startSize =
+      target === "horizontal" ? dashHeight : target === "vertical" ? dashWidth : rightWidth;
 
     const onMouseMove = (moveEvent) => {
       if (!isResizingRef.current) return;
@@ -193,19 +451,19 @@ export function PortalContainer() {
 
       if (target === "horizontal") {
         const delta = currentPos - startPos;
-        setDashHeight(Math.max(100, startSize + delta));
+        setDashHeight(Math.max(120, startSize + delta));
       } else if (target === "vertical") {
         const delta = currentPos - startPos;
-        setDashWidth(Math.max(100, startSize + delta));
-      } else if (target === "right") {
+        setDashWidth(Math.max(240, startSize + delta));
+      } else {
         const delta = startPos - currentPos;
-        const newSize = Math.max(56, startSize + delta);
-        if (newSize < 150) {
-          if (!isRightCollapsed) setIsRightCollapsed(true);
-          setRightWidth(56);
+        const nextSize = Math.max(72, startSize + delta);
+        if (nextSize < 160) {
+          setIsRightCollapsed(true);
+          setRightWidth(72);
         } else {
-          if (isRightCollapsed) setIsRightCollapsed(false);
-          setRightWidth(newSize);
+          setIsRightCollapsed(false);
+          setRightWidth(nextSize);
         }
       }
     };
@@ -223,184 +481,19 @@ export function PortalContainer() {
     document.body.style.cursor = target === "horizontal" ? "row-resize" : "col-resize";
   };
 
-  const visibleRecommendations = activeRecommendations.filter(
-    (r) => !dismissedRecommendations.includes(r.id)
-  );
-
-  const handleRecommendationClick = ({ recommendationId }) => {
-    const rec = RECOMMENDATIONS[recommendationId];
-    if (!rec) return;
-
-    setDismissedRecommendations((prev) => [...prev, recommendationId]);
-
-    const userMsg = {
-      id: Date.now(),
-      role: "user",
-      content: rec.userMessage,
-    };
-    setMessages((prev) => [...prev, userMsg]);
-
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: `${rec.summary}\n\n${rec.detail}`,
-          suggestedActions: rec.actions,
-        },
-      ]);
-    }, 800);
-  };
-
-  const handleSendMessage = (content, attachedAssets = []) => {
-    const messageContent = content.trim() || `Anexei ${attachedAssets.length} hábito(s)`;
-
-    const newUserMessage = {
-      id: Date.now(),
-      role: "user",
-      content: messageContent,
-      attachedAssets,
-    };
-
-    setMessages((prev) => [...prev, newUserMessage]);
-
-    setTimeout(() => {
-      let aiResponseContent = "Recebi sua mensagem. Vamos transformar movimento em algo leve, viável e repetível.";
-      let aiSuggestedActions = null;
-
-      const contentLower = content.toLowerCase();
-
-      // Check if this matches a recommendation action
-      const matchedRecommendationAction = Object.values(RECOMMENDATIONS)
-        .flatMap((rec) => rec.actions)
-        .find((a) => a.message === content);
-
-      const actionContext = lastActionContextRef.current;
-      const matchedAction = actionContext
-        ? Object.values(ASSET_TYPE_ACTIONS)
-            .flat()
-            .find((a) => a.message === content && a.toolId)
-        : null;
-
-      if (matchedAction && actionContext) {
-        const { toolId } = matchedAction;
-        const { asset } = actionContext;
-        lastActionContextRef.current = null;
-
-        setToolTaskSpawned(true);
-        setIsRightCollapsed(false);
-        setRightWidth(350);
-
-        setTimeout(() => {
-          catalogRef.current?.spawnTaskByToolId({ toolId, asset });
-        }, 100);
-
-        handleToolTriggered({ toolId });
-
-        aiResponseContent = `Comecei **${matchedAction.label}** para **${asset.name}**. Você pode acompanhar no painel de **Próximas atividades**.`;
-      } else if (matchedRecommendationAction) {
-        aiResponseContent = `Perfeito. Vou **${matchedRecommendationAction.label.toLowerCase()}** para você agora, e o progresso vai aparecer no painel de **Próximas atividades**.`;
-      } else if (content === "Agora não" || content === "Valeu, eu resolvo isso manualmente" || content === "Anotado, obrigado" || content === "Depois eu adiciono esse plano B" || content === "Pular por enquanto") {
-        lastActionContextRef.current = null;
-        aiResponseContent = "Sem problema. Quando você quiser, a gente deixa o próximo passo ainda menor e mais fácil.";
-      } else if (
-        contentLower.includes("sedent") ||
-        contentLower.includes("rotina") ||
-        contentLower.includes("baixa energia")
-      ) {
-        aiResponseContent = "Boa. Vamos começar pelo que seu dia real permite.\n\nArraste hábitos e materiais aqui embaixo para continuar.";
-      } else if (contentLower.includes("hábito") && contentLower.includes("adicionado")) {
-        aiResponseContent = "Perfeito. Agora me diga qual padrão você quer construir primeiro.";
-      } else if (attachedAssets.length > 0) {
-        const lastAsset = attachedAssets[attachedAssets.length - 1];
-        const assetNames = attachedAssets.map((a) => `**${a.name}**`).join(", ");
-        const prompt = ASSET_TYPE_PROMPTS[lastAsset?.type] ?? "O que você quer construir a partir disso?";
-        const actions = ASSET_TYPE_ACTIONS[lastAsset?.type] ?? [
-          { label: "Sim", message: "Sim, pode seguir" },
-          { label: "Agora não", message: "Agora não" },
-        ];
-
-        attachedAssets.forEach((asset) => {
-          if (!asset.checked) {
-            setAssets((prev) => {
-              if (prev.some((a) => a.id === asset.id)) return prev;
-              return [...prev, { ...asset, checked: true }];
-            });
-          }
-        });
-
-        lastActionContextRef.current = { asset: lastAsset };
-        aiResponseContent = `Recebido. Já tenho ${assetNames} comigo.\n\n${prompt}`;
-        aiSuggestedActions = actions;
-      } else if (content.toLowerCase().includes("adicionar hábito") || content.toLowerCase().includes("aqui está um hábito")) {
-        const newAsset = getNextAsset();
-        setAssets((prev) => [...prev, newAsset]);
-        aiResponseContent = `Adicionei **${newAsset.name}** (${newAsset.type}) aos seus hábitos. Agora temos ${assets.length + 1} hábito(s) conectados.\n\n*${newAsset.description}*`;
-      } else if (assets.length === 0) {
-        aiResponseContent = "Você pode me mostrar um hábito ou material primeiro? Digite `adicionar hábito` para simular um, ou arraste uma rotina, checklist, plano ou diário aqui no chat.";
-      }
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: aiResponseContent,
-          ...(aiSuggestedActions ? { suggestedActions: aiSuggestedActions } : {}),
-        },
-      ]);
-    }, 1000);
-  };
-
-  const handleAddAssetDemo = () => {
-    const newAsset = getNextAsset();
-    setAssets((prev) => [...prev, newAsset]);
-
-    const newUserMessage = {
-      id: Date.now(),
-      role: "user",
-      content: `Hábito **${newAsset.name}** adicionado!`,
-      attachedAssets: [],
-    };
-    setMessages((prev) => [...prev, newUserMessage]);
-
-    setTimeout(() => {
-      const prompt = ASSET_TYPE_PROMPTS[newAsset.type] ?? "O que você quer fazer com esse hábito?";
-      const actions = ASSET_TYPE_ACTIONS[newAsset.type] ?? [
-        { label: "Sim", message: "Sim, pode seguir" },
-        { label: "Agora não", message: "Agora não" },
-      ];
-
-      lastActionContextRef.current = { asset: newAsset };
-
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: Date.now() + 1,
-          role: "assistant",
-          content: `Boa. **${newAsset.name}** já está conectado.\n\n${prompt}`,
-          suggestedActions: actions,
-        },
-      ]);
-    }, 1000);
-  };
-
   const toggleRightCollapse = () => {
-    setIsRightCollapsed((prev) => {
-      if (!prev) {
-        setRightWidth(56);
+    setIsRightCollapsed((previous) => {
+      if (!previous) {
+        setRightWidth(72);
         return true;
       }
-      setRightWidth(350);
+      setRightWidth(360);
       return false;
     });
   };
 
-  const hasAssets = assets.length > 0;
-  const showCatalog = assets.length > 0 || toolTaskSpawned;
   const showDashboard = dashboardMode !== "hidden";
-  const dashboardLayout = dashboardMode === "hidden" ? "horizontal" : dashboardMode;
+  const dashboardLayout = showDashboard ? dashboardMode : "horizontal";
 
   const handleToggleDashboard = () => {
     if (showDashboard && dashboardLayout === "horizontal") {
@@ -419,172 +512,149 @@ export function PortalContainer() {
       style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "3rem" }}
     >
       <div className="flex h-full w-full font-secondary text-bodyPrimary">
-        {/* Left Panel: Sidebar */}
         <PortalSidebar
-          assets={assets}
-          onAddAsset={handleAddAssetDemo}
-          onActivityClick={handleActivityClick}
+          teams={MOCK_TEAMS}
+          activeTeamId={activeTeamId}
+          onTeamChange={setActiveTeamId}
+          conversations={visibleConversations}
+          activeConversationId={activeConversationId}
+          onSelectConversation={setActiveConversationId}
+          onNewConversation={handleNewConversation}
         />
 
-        {/* Center Area */}
-        <div className="flex-1 flex flex-col min-w-[300px] relative bg-navBackground">
-        {/* Top Controls Header */}
-        <div className="flex items-center justify-end gap-2 p-3 z-20 bg-navBackground flex-shrink-0">
-          <button
-            onClick={toggleTheme}
-            className="p-1.5 rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-            title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
-          >
-            {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
-          <button
-            onClick={() => setSettingsOpen(true)}
-            className="p-1.5 rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-            title="Widgets de progresso"
-          >
-            <Settings size={18} />
-          </button>
-          <button
-            onClick={handleToggleDashboard}
-            className="p-1.5 rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-            title="Alternar layout do painel"
-          >
-            <LayoutGrid size={18} />
-          </button>
-        </div>
-
-        {/* Horizontal Dashboard (Top) */}
-        <div
-          className={cn(
-            "bg-navBackground overflow-hidden flex-shrink-0 relative",
-            isResizing === "horizontal" ? "" : "transition-all duration-500 ease-in-out",
-            showDashboard && dashboardLayout === "horizontal"
-              ? "border-b border-cardStroke opacity-100"
-              : "border-transparent opacity-0"
-          )}
-          style={{
-            height: showDashboard && dashboardLayout === "horizontal" ? dashHeight : 0,
-          }}
-        >
-          <div className="absolute inset-x-0 top-0" style={{ height: dashHeight }}>
-            <DashboardCanva
-              layout="horizontal"
-              cards={widgetCards}
-              onUpdateCard={handleUpdateCard}
-              onRemoveWidget={handleRemoveWidget}
-            />
+        <div className="relative flex min-w-[300px] flex-1 flex-col bg-navBackground">
+          <div className="z-20 flex flex-shrink-0 items-center justify-end gap-2 bg-navBackground p-3">
+            <button
+              onClick={toggleTheme}
+              className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+              title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
+            >
+              {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
+            </button>
+            <button
+              onClick={() => setSettingsOpen(true)}
+              className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+              title="Widgets do dashboard"
+            >
+              <Settings size={18} />
+            </button>
+            <button
+              onClick={handleToggleDashboard}
+              className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+              title="Alternar layout do dashboard"
+            >
+              <LayoutGrid size={18} />
+            </button>
           </div>
 
-          {showDashboard && dashboardLayout === "horizontal" && (
-            <div
-              onMouseDown={(e) => startResizing(e, "horizontal")}
-              className={cn(
-                "z-20 absolute transition-opacity duration-300",
-                isResizing === "horizontal" ? "opacity-100" : "opacity-0 hover:opacity-100",
-                "h-2 w-full cursor-row-resize left-0 bottom-0 bg-gradient-to-r from-transparent via-secondaryCardStroke/50 to-transparent"
-              )}
-              style={{ bottom: -4 }}
-            />
-          )}
-        </div>
-
-        {/* Bottom Area: Vertical Dashboard + Chatbot */}
-        <div className="flex-1 flex min-h-0 relative">
-          {/* Vertical Dashboard (Left) */}
           <div
             className={cn(
-              "bg-navBackground overflow-hidden flex-shrink-0 relative",
-              isResizing === "vertical" ? "" : "transition-all duration-500 ease-in-out",
-              showDashboard && dashboardLayout === "vertical"
-                ? "border-r border-cardStroke opacity-100"
+              "relative flex-shrink-0 overflow-hidden bg-navBackground",
+              isResizing === "horizontal" ? "" : "transition-all duration-500 ease-in-out",
+              showDashboard && dashboardLayout === "horizontal"
+                ? "border-b border-cardStroke opacity-100"
                 : "border-transparent opacity-0"
             )}
-            style={{
-              width: showDashboard && dashboardLayout === "vertical" ? dashWidth : 0,
-            }}
+            style={{ height: showDashboard && dashboardLayout === "horizontal" ? dashHeight : 0 }}
           >
-            <div className="absolute inset-y-0 left-0" style={{ width: dashWidth }}>
+            <div className="absolute inset-x-0 top-0" style={{ height: dashHeight }}>
               <DashboardCanva
-                layout="vertical"
+                layout="horizontal"
                 cards={widgetCards}
                 onUpdateCard={handleUpdateCard}
                 onRemoveWidget={handleRemoveWidget}
               />
             </div>
 
-            {showDashboard && dashboardLayout === "vertical" && (
+            {showDashboard && dashboardLayout === "horizontal" && (
               <div
-                onMouseDown={(e) => startResizing(e, "vertical")}
+                onMouseDown={(event) => startResizing(event, "horizontal")}
                 className={cn(
-                  "z-20 absolute transition-opacity duration-300",
-                  isResizing === "vertical" ? "opacity-100" : "opacity-0 hover:opacity-100",
-                  "w-2 h-full cursor-col-resize top-0 right-0 bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent"
+                  "absolute bottom-0 left-0 z-20 h-2 w-full cursor-row-resize bg-gradient-to-r from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
+                  isResizing === "horizontal" ? "opacity-100" : "opacity-0 hover:opacity-100"
                 )}
-                style={{ right: -4 }}
+                style={{ bottom: -4 }}
               />
             )}
           </div>
 
-          {/* Main: Chatbot UI */}
-          <div className="flex-1 flex flex-col min-h-0 min-w-0">
-            <ChatbotUI
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              onAddAsset={handleAddAssetDemo}
-              isCentered={!hasAssets}
-              recommendations={visibleRecommendations}
-              onRecommendationClick={handleRecommendationClick}
-            />
+          <div className="relative flex min-h-0 flex-1">
+            <div
+              className={cn(
+                "relative flex-shrink-0 overflow-hidden bg-navBackground",
+                isResizing === "vertical" ? "" : "transition-all duration-500 ease-in-out",
+                showDashboard && dashboardLayout === "vertical"
+                  ? "border-r border-cardStroke opacity-100"
+                  : "border-transparent opacity-0"
+              )}
+              style={{ width: showDashboard && dashboardLayout === "vertical" ? dashWidth : 0 }}
+            >
+              <div className="absolute inset-y-0 left-0" style={{ width: dashWidth }}>
+                <DashboardCanva
+                  layout="vertical"
+                  cards={widgetCards}
+                  onUpdateCard={handleUpdateCard}
+                  onRemoveWidget={handleRemoveWidget}
+                />
+              </div>
+
+              {showDashboard && dashboardLayout === "vertical" && (
+                <div
+                  onMouseDown={(event) => startResizing(event, "vertical")}
+                  className={cn(
+                    "absolute right-0 top-0 z-20 h-full w-2 cursor-col-resize bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
+                    isResizing === "vertical" ? "opacity-100" : "opacity-0 hover:opacity-100"
+                  )}
+                  style={{ right: -4 }}
+                />
+              )}
+            </div>
+
+            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+              <ChatbotUI
+                conversationTitle={activeConversation?.title ?? "Conversa"}
+                teamName={activeTeam.name}
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                isCentered={messages.length === 0}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Right Panel: Tools */}
-      <div
-        className={cn(
-          "bg-navBackground flex-shrink-0 flex flex-col relative overflow-hidden",
-          isResizing === "right" ? "" : "transition-all duration-500 ease-in-out",
-          showCatalog
-            ? "border-l border-cardStroke opacity-100"
-            : "w-0 border-transparent opacity-0"
-        )}
-        style={{ width: showCatalog ? rightWidth : 0 }}
-      >
-        {showCatalog && (
+        <div
+          className={cn(
+            "relative flex flex-shrink-0 flex-col overflow-hidden bg-navBackground border-l border-cardStroke",
+            isResizing === "right" ? "" : "transition-all duration-500 ease-in-out"
+          )}
+          style={{ width: rightWidth }}
+        >
           <div
-            onMouseDown={(e) => startResizing(e, "right")}
+            onMouseDown={(event) => startResizing(event, "right")}
             className={cn(
-              "z-20 absolute transition-opacity duration-300",
-              isResizing === "right" ? "opacity-100" : "opacity-0 hover:opacity-100",
-              "w-2 h-full cursor-col-resize top-0 left-0 bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent"
+              "absolute left-0 top-0 z-20 h-full w-2 cursor-col-resize bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
+              isResizing === "right" ? "opacity-100" : "opacity-0 hover:opacity-100"
             )}
             style={{ left: -4 }}
           />
-        )}
 
-        <CatalogPanel
-          ref={catalogRef}
-          assets={assets}
-          isCollapsed={isRightCollapsed}
-          onToggleCollapse={toggleRightCollapse}
-        />
-      </div>
+          <CatalogPanel
+            activities={teamActivities}
+            habits={teamHabits}
+            tasks={teamTasks}
+            isCollapsed={isRightCollapsed}
+            onToggleCollapse={toggleRightCollapse}
+            onActivityClick={handleActivityClick}
+          />
+        </div>
 
-        {/* Widget Settings Dialog */}
         <WidgetSettingsDialog
           open={settingsOpen}
           onOpenChange={setSettingsOpen}
           activeWidgetIds={activeWidgetIds}
           onToggleWidget={handleToggleWidget}
-          suggestedWidgetId={suggestedWidgetId}
-          onDismissSuggestion={handleDismissSuggestion}
-        />
-
-        {/* Activity Detail Dialog */}
-        <ActivityDetailDialog
-          activity={selectedActivity}
-          open={activityDialogOpen}
-          onOpenChange={setActivityDialogOpen}
+          suggestedWidgetId={null}
+          onDismissSuggestion={() => {}}
         />
       </div>
     </SidebarProvider>

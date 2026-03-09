@@ -1,24 +1,16 @@
 "use client";
 
-import { useState, useEffect, useRef, forwardRef } from "react";
+import { useState } from "react";
 import {
-  Building2,
   ChevronsUpDown,
-  Plus,
-  FileCode,
-  FileText,
-  Shield,
-  Server,
-  ClipboardList,
-  ScrollText,
-  Network,
-  AppWindow,
-  LogOut,
-  Settings,
-  User,
-  ChevronRight,
+  MessageSquareText,
   PanelLeftClose,
   PanelLeftOpen,
+  Plus,
+  Settings,
+  User,
+  Users,
+  LogOut,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
@@ -46,132 +38,51 @@ import {
   SidebarSeparator,
   useSidebar,
 } from "../components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../components/ui/collapsible";
-import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { MOCK_ORGANIZATIONS, MOCK_USER, MOCK_ACTIVITIES } from "./mockPortalData";
+import { MOCK_USER } from "./mockPortalData";
 
-const ASSET_TYPE_ICON_MAP = {
-  Caminhada: FileCode,
-  Rotina: AppWindow,
-  "Agenda semanal": Network,
-  "Guia alimentar": ScrollText,
-  Checklist: ClipboardList,
-  Ambiente: Server,
-  "Plano de sono": Shield,
-  Diário: FileText,
-  Jornada: FileText,
-};
-
-const ACTIVITY_STATUS_COLORS = {
-  "Em andamento": "bg-blue-500",
-  Concluída: "bg-green-500",
-  Reajustando: "bg-salmon",
-  Planejada: "bg-icons",
-};
-
-function getAssetIcon({ type, size = 16 }) {
-  const Icon = ASSET_TYPE_ICON_MAP[type] ?? FileText;
-  return <Icon size={size} />;
-}
-
-function getTotalFindings({ findingsBySeverity = {} }) {
-  return Object.values(findingsBySeverity).reduce((sum, count) => sum + count, 0);
-}
-
-const DraggableAssetItem = forwardRef(
-  ({ asset, children, className, as: Component = "div", ...props }, forwardedRef) => {
-    const localRef = useRef(null);
-    const [isDragging, setIsDragging] = useState(false);
-
-    const setRefs = (node) => {
-      localRef.current = node;
-      if (typeof forwardedRef === "function") {
-        forwardedRef(node);
-      } else if (forwardedRef) {
-        forwardedRef.current = node;
-      }
-    };
-
-    useEffect(() => {
-      const el = localRef.current;
-      if (!el) return;
-
-      return draggable({
-        element: el,
-        getInitialData: () => ({ asset }),
-        onDragStart: () => setIsDragging(true),
-        onDrop: () => setIsDragging(false),
-      });
-    }, [asset]);
-
-    return (
-      <Component
-        ref={setRefs}
-        className={cn(className, isDragging ? "opacity-50 cursor-grabbing" : "cursor-grab")}
-        {...props}
-      >
-        {children}
-      </Component>
-    );
-  }
-);
-
-DraggableAssetItem.displayName = "DraggableAssetItem";
-
-function OrgSwitcher() {
-  const [activeOrg, setActiveOrg] = useState(MOCK_ORGANIZATIONS[0]);
+function TeamSwitcher({ teams, activeTeamId, onTeamChange }) {
   const { isMobile } = useSidebar();
+  const activeTeam = teams.find((team) => team.id === activeTeamId) ?? teams[0];
+
+  if (!activeTeam) return null;
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-cardBackgroundHover"
-            >
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-cardBackgroundHover">
               <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-hAccent text-white-black">
-                <Building2 className="size-4" />
+                <Users className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-title">
-                  {activeOrg.name}
-                </span>
-                <span className="truncate text-xs text-subtitle">
-                  {activeOrg.plan}
-                </span>
+                <span className="truncate font-semibold text-title">{activeTeam.name}</span>
+                <span className="truncate text-xs text-subtitle">{activeTeam.plan}</span>
               </div>
               <ChevronsUpDown className="ml-auto text-icons" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg bg-cardBackground border-cardStroke"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg border-cardStroke bg-cardBackground"
             align="start"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
-            <DropdownMenuLabel className="text-xs text-subtitle">
-              Espaços do coach
-            </DropdownMenuLabel>
-            {MOCK_ORGANIZATIONS.map((org) => (
+            <DropdownMenuLabel className="text-xs text-subtitle">Times</DropdownMenuLabel>
+            {teams.map((team) => (
               <DropdownMenuItem
-                key={org.id}
-                onClick={() => setActiveOrg(org)}
+                key={team.id}
+                onClick={() => onTeamChange?.(team.id)}
                 className={cn(
                   "gap-2 p-2 cursor-pointer",
-                  activeOrg.id === org.id && "bg-cardBackgroundHover"
+                  team.id === activeTeam.id && "bg-cardBackgroundHover"
                 )}
               >
                 <div className="flex size-6 items-center justify-center rounded-sm border border-cardStroke bg-secondaryCardBackground">
-                  <Building2 className="size-4 shrink-0 text-icons" />
+                  <Users className="size-4 shrink-0 text-icons" />
                 </div>
-                <span className="text-title">{org.name}</span>
-                <span className="ml-auto text-xs text-subtitle">{org.plan}</span>
+                <span className="text-title">{team.name}</span>
+                <span className="ml-auto text-xs text-subtitle">{team.plan}</span>
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
@@ -183,10 +94,9 @@ function OrgSwitcher() {
 
 function UserFooter() {
   const { isMobile } = useSidebar();
-
   const initials = MOCK_USER.name
     .split(" ")
-    .map((n) => n[0])
+    .map((part) => part[0])
     .join("")
     .toUpperCase();
 
@@ -195,28 +105,21 @@ function UserFooter() {
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-cardBackgroundHover"
-            >
+            <SidebarMenuButton size="lg" className="data-[state=open]:bg-cardBackgroundHover">
               <Avatar className="h-8 w-8 rounded-lg">
-                <AvatarFallback className="rounded-lg bg-hAccent text-white-black text-xs font-semibold">
+                <AvatarFallback className="rounded-lg bg-hAccent text-xs font-semibold text-white-black">
                   {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-title">
-                  {MOCK_USER.name}
-                </span>
-                <span className="truncate text-xs text-subtitle">
-                  {MOCK_USER.email}
-                </span>
+                <span className="truncate font-semibold text-title">{MOCK_USER.name}</span>
+                <span className="truncate text-xs text-subtitle">{MOCK_USER.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4 text-icons" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg bg-cardBackground border-cardStroke"
+            className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg border-cardStroke bg-cardBackground"
             side={isMobile ? "top" : "right"}
             align="end"
             sideOffset={4}
@@ -224,17 +127,13 @@ function UserFooter() {
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarFallback className="rounded-lg bg-hAccent text-white-black text-xs font-semibold">
+                  <AvatarFallback className="rounded-lg bg-hAccent text-xs font-semibold text-white-black">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold text-title">
-                    {MOCK_USER.name}
-                  </span>
-                  <span className="truncate text-xs text-subtitle">
-                    {MOCK_USER.email}
-                  </span>
+                  <span className="truncate font-semibold text-title">{MOCK_USER.name}</span>
+                  <span className="truncate text-xs text-subtitle">{MOCK_USER.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
@@ -265,7 +164,7 @@ function SidebarToggle() {
   return (
     <button
       onClick={toggleSidebar}
-      className="p-1.5 hover:bg-cardBackgroundHover rounded-md text-icons hover:text-hAccent transition-colors"
+      className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
       title={open ? "Recolher menu" : "Expandir menu"}
     >
       {open ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
@@ -273,19 +172,30 @@ function SidebarToggle() {
   );
 }
 
-export function PortalSidebar({ assets = [], onAddAsset, onActivityClick }) {
-  const [assetsOpen, setAssetsOpen] = useState(true);
-  const [activitiesOpen, setActivitiesOpen] = useState(true);
+export function PortalSidebar({
+  teams = [],
+  activeTeamId,
+  onTeamChange,
+  conversations = [],
+  activeConversationId,
+  onSelectConversation,
+  onNewConversation,
+}) {
+  const [conversationsOpen] = useState(true);
 
   return (
     <Sidebar
       collapsible="icon"
-      className="!relative !h-full !inset-auto !border-r-cardStroke [&_[data-sidebar=sidebar]]:bg-navBackground"
+      className="!relative !inset-auto !h-full !border-r-cardStroke [&_[data-sidebar=sidebar]]:bg-navBackground"
     >
       <SidebarHeader>
         <div className="flex items-center justify-between">
-          <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <OrgSwitcher />
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <TeamSwitcher
+              teams={teams}
+              activeTeamId={activeTeamId}
+              onTeamChange={onTeamChange}
+            />
           </div>
           <SidebarToggle />
         </div>
@@ -294,94 +204,65 @@ export function PortalSidebar({ assets = [], onAddAsset, onActivityClick }) {
       <SidebarSeparator className="!bg-cardStroke" />
 
       <SidebarContent>
-        {/* Habits section */}
-        <Collapsible open={assetsOpen} onOpenChange={setAssetsOpen} className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel asChild className="text-subtitle uppercase text-xs tracking-wider font-semibold">
-              <CollapsibleTrigger>
-                Hábitos
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddAsset?.();
-                  }}
-                  title="Adicionar hábito"
-                  className="ml-auto flex size-5 items-center justify-center rounded-md hover:bg-cardBackgroundHover text-icons hover:text-hAccent transition-colors"
-                >
-                  <Plus className="size-4" />
-                </button>
-                <ChevronRight className="transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {assets.length === 0 ? (
-                    <li className="px-2 py-4 text-xs text-icons text-center">
-                      Nenhum hábito conectado ainda.
-                    </li>
-                  ) : (
-                    assets.map((asset) => (
-                      <SidebarMenuItem key={asset.id}>
-                        <DraggableAssetItem asset={asset} as="div">
-                          <SidebarMenuButton tooltip={asset.name} className="text-bodyPrimary hover:text-title hover:bg-cardBackgroundHover !h-auto py-1.5">
-                            {getAssetIcon({ type: asset.type })}
-                            <div className="flex flex-col min-w-0 leading-tight">
-                              <span className="truncate text-sm">{asset.name}</span>
-                              <span className="truncate text-2xs text-subtitle">{asset.type}</span>
-                            </div>
-                          </SidebarMenuButton>
-                        </DraggableAssetItem>
-                      </SidebarMenuItem>
-                    ))
-                  )}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
-
-        <SidebarSeparator className="!bg-cardStroke" />
-
-        {/* Journeys section */}
-        <Collapsible open={activitiesOpen} onOpenChange={setActivitiesOpen} className="group/collapsible">
-          <SidebarGroup>
-            <SidebarGroupLabel asChild className="text-subtitle uppercase text-xs tracking-wider font-semibold">
-              <CollapsibleTrigger>
-                Jornadas
-                <ChevronRight className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-90" />
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {MOCK_ACTIVITIES.map((activity) => (
-                    <SidebarMenuItem key={activity.id}>
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-subtitle">
+            <div className="flex w-full items-center gap-2">
+              <span>Conversas</span>
+              <button
+                onClick={() => onNewConversation?.()}
+                title="Nova conversa"
+                className="ml-auto flex size-5 items-center justify-center rounded-md text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+              >
+                <Plus className="size-4" />
+              </button>
+            </div>
+          </SidebarGroupLabel>
+          {conversationsOpen && (
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {conversations.length === 0 ? (
+                  <li className="px-2 py-4 text-center text-xs text-icons">
+                    Nenhuma conversa neste time ainda.
+                  </li>
+                ) : (
+                  conversations.map((conversation) => (
+                    <SidebarMenuItem key={conversation.id}>
                       <SidebarMenuButton
-                        tooltip={activity.name}
-                        className="text-bodyPrimary hover:text-title hover:bg-cardBackgroundHover"
-                        onClick={() => onActivityClick?.(activity)}
+                        tooltip={conversation.title}
+                        onClick={() => onSelectConversation?.(conversation.id)}
+                        className={cn(
+                          "!h-auto items-start gap-2 py-2 text-bodyPrimary hover:bg-cardBackgroundHover hover:text-title",
+                          conversation.id === activeConversationId &&
+                            "bg-cardBackgroundHover text-title"
+                        )}
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          <span
-                            className={cn(
-                              "size-2 rounded-full shrink-0",
-                              ACTIVITY_STATUS_COLORS[activity.status] ?? "bg-icons"
-                            )}
-                          />
-                          <span className="truncate">{activity.name}</span>
+                        <MessageSquareText className="mt-0.5 size-4 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="truncate text-sm font-medium">
+                              {conversation.title}
+                            </span>
+                            <span className="shrink-0 text-2xs text-subtitle">
+                              {conversation.updatedLabel}
+                            </span>
+                          </div>
+                          <p className="truncate text-2xs text-subtitle">
+                            {conversation.preview}
+                          </p>
                         </div>
                       </SidebarMenuButton>
-                      <SidebarMenuBadge className="text-2xs text-subtitle">
-                        {getTotalFindings({ findingsBySeverity: activity.findingsBySeverity })}
-                      </SidebarMenuBadge>
+                      {conversation.unread > 0 && (
+                        <SidebarMenuBadge className="text-2xs text-hAccent">
+                          {conversation.unread}
+                        </SidebarMenuBadge>
+                      )}
                     </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </SidebarGroup>
-        </Collapsible>
+                  ))
+                )}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          )}
+        </SidebarGroup>
       </SidebarContent>
 
       <SidebarFooter>
