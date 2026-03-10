@@ -10,6 +10,12 @@ import {
   PanelRightOpen,
 } from "lucide-react";
 import { cn } from "../lib/utils";
+import {
+  PortalPanel,
+  PortalPanelBody,
+  PortalPanelHeader,
+  PortalPanelHeaderLead,
+} from "./PortalLayout";
 
 const TYPE_ICON_MAP = {
   habit: Footprints,
@@ -107,13 +113,13 @@ export function CatalogPanel({
   ];
 
   return (
-    <aside className="flex h-full flex-col">
-      <div className="flex items-center justify-between border-b border-cardStroke px-4 py-3">
+    <PortalPanel as="aside">
+      <PortalPanelHeader>
         {!isCollapsed && (
-          <div>
+          <PortalPanelHeaderLead>
             <h3 className="text-sm font-semibold text-title">Próximas Atividades</h3>
             <p className="text-xs text-subtitle">Hábitos, tarefas e insights para agir agora.</p>
-          </div>
+          </PortalPanelHeaderLead>
         )}
         <button
           onClick={onToggleCollapse}
@@ -122,10 +128,10 @@ export function CatalogPanel({
         >
           {isCollapsed ? <PanelRightOpen size={18} /> : <PanelRightClose size={18} />}
         </button>
-      </div>
+      </PortalPanelHeader>
 
       {isCollapsed ? (
-        <div className="flex flex-1 flex-col items-center gap-3 px-2 py-4">
+        <PortalPanelBody className="flex flex-col items-center gap-3 px-2 py-4">
           {activities.slice(0, 4).map((activity) => {
             const Icon = TYPE_ICON_MAP[activity.type] ?? BellRing;
             const styleClass = TYPE_STYLES[activity.type] ?? "text-icons bg-cardBackgroundHover";
@@ -143,9 +149,9 @@ export function CatalogPanel({
               </button>
             );
           })}
-        </div>
+        </PortalPanelBody>
       ) : (
-        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 scrollbar-thin">
+        <PortalPanelBody className="space-y-5 overflow-y-auto px-4 py-4 scrollbar-thin">
           <div className="grid grid-cols-3 gap-2">
             {stats.map((stat) => (
               <div key={stat.label} className="rounded-lg border border-cardStroke bg-cardBackground p-3">
@@ -208,8 +214,8 @@ export function CatalogPanel({
               ))}
             </div>
           </section>
-        </div>
+        </PortalPanelBody>
       )}
-    </aside>
+    </PortalPanel>
   );
 }

@@ -39,6 +39,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "../components/ui/sidebar";
+import { PortalPanelHeaderLead } from "./PortalLayout";
 import { MOCK_USER } from "./mockPortalData";
 
 function TeamSwitcher({ teams, activeTeamId, onTeamChange }) {
@@ -228,20 +229,20 @@ export function PortalSidebar({
       collapsible="icon"
       className="!relative !inset-auto !h-full !border-r-cardStroke [&_[data-sidebar=sidebar]]:bg-navBackground"
     >
-      <SidebarHeader>
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+      <SidebarHeader className="gap-0">
+        <div className="flex min-h-10 items-center justify-between gap-2">
+          <PortalPanelHeaderLead className="group-data-[collapsible=icon]:hidden">
             <TeamSwitcher
               teams={teams}
               activeTeamId={activeTeamId}
               onTeamChange={onTeamChange}
             />
-          </div>
+          </PortalPanelHeaderLead>
           <SidebarToggle />
         </div>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent className="gap-0">
         {equipmentItems.length > 0 && (
           <SidebarGroup>
             <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-subtitle">
@@ -314,7 +315,7 @@ export function PortalSidebar({
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
+      <SidebarFooter className="gap-0">
         <UserFooter />
       </SidebarFooter>
 

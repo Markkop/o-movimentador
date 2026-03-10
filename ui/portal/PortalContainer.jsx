@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CatalogPanel } from "./CatalogPanel";
 import { DashboardCanva } from "./DashboardCanva";
+import {
+  PortalPanel,
+  PortalPanelHeader,
+  PortalResizeHandle,
+  PortalShell,
+} from "./PortalLayout";
 import { PortalChatSession } from "./PortalChatSession";
 import { WidgetSettingsDialog } from "./widgets/WidgetSettingsDialog";
 import { PortalSidebar } from "./PortalSidebar";
@@ -924,6 +930,40 @@ function createFollowUpItem({ message, teamId, linkedConversationId }) {
   return null;
 }
 
+function DashboardDock({ active, axis, children, onResizeStart, size, visible }) {
+  const isHorizontal = axis === "horizontal";
+
+  return (
+    <PortalPanel
+      className={cn(
+        "flex-shrink-0",
+        active ? "" : "transition-all duration-500 ease-in-out",
+        visible
+          ? isHorizontal
+            ? "border-b border-cardStroke opacity-100"
+            : "border-r border-cardStroke opacity-100"
+          : "border-transparent opacity-0"
+      )}
+      style={isHorizontal ? { height: visible ? size : 0 } : { width: visible ? size : 0 }}
+    >
+      <div
+        className={cn("absolute", isHorizontal ? "inset-x-0 top-0" : "inset-y-0 left-0")}
+        style={isHorizontal ? { height: size } : { width: size }}
+      >
+        {children}
+      </div>
+
+      {visible && (
+        <PortalResizeHandle
+          active={active}
+          orientation={axis}
+          onMouseDown={onResizeStart}
+        />
+      )}
+    </PortalPanel>
+  );
+}
+
 export function PortalContainer() {
   const { theme, toggleTheme } = useTheme();
 
@@ -1322,7 +1362,7 @@ export function PortalContainer() {
         "--sidebar-width-icon": `${LEFT_PANEL_COLLAPSED_WIDTH}px`,
       }}
     >
-      <div className="flex h-full w-full font-secondary text-bodyPrimary">
+      <PortalShell>
         {showConversationSidebar && (
           <PortalSidebar
             teams={MOCK_TEAMS}
@@ -1338,9 +1378,9 @@ export function PortalContainer() {
           />
         )}
 
-        <div className="relative flex min-w-[300px] flex-1 flex-col bg-navBackground">
+        <PortalPanel className="min-w-[300px] flex-1">
           {showConversationSidebar && (
-            <div className="z-20 flex flex-shrink-0 items-center justify-end gap-2 bg-navBackground p-3">
+            <PortalPanelHeader className="z-20 justify-end border-b-0 p-3">
               <button
                 onClick={toggleAiMode}
                 className={cn(
@@ -1374,71 +1414,39 @@ export function PortalContainer() {
               >
                 <LayoutGrid size={18} />
               </button>
-            </div>
+            </PortalPanelHeader>
           )}
 
-          <div
-            className={cn(
-              "relative flex-shrink-0 overflow-hidden bg-navBackground",
-              isResizing === "horizontal" ? "" : "transition-all duration-500 ease-in-out",
-              showDashboard && dashboardLayout === "horizontal"
-                ? "border-b border-cardStroke opacity-100"
-                : "border-transparent opacity-0"
-            )}
-            style={{ height: showDashboard && dashboardLayout === "horizontal" ? dashHeight : 0 }}
+          <DashboardDock
+            active={isResizing === "horizontal"}
+            axis="horizontal"
+            visible={showDashboard && dashboardLayout === "horizontal"}
+            size={dashHeight}
+            onResizeStart={(event) => startResizing(event, "horizontal")}
           >
-            <div className="absolute inset-x-0 top-0" style={{ height: dashHeight }}>
+            <DashboardCanva
+              layout="horizontal"
+              cards={widgetCards}
+              onUpdateCard={handleUpdateCard}
+              onRemoveWidget={handleRemoveWidget}
+            />
+          </DashboardDock>
+
+          <div className="relative flex min-h-0 flex-1">
+            <DashboardDock
+              active={isResizing === "vertical"}
+              axis="vertical"
+              visible={showDashboard && dashboardLayout === "vertical"}
+              size={dashWidth}
+              onResizeStart={(event) => startResizing(event, "vertical")}
+            >
               <DashboardCanva
-                layout="horizontal"
+                layout="vertical"
                 cards={widgetCards}
                 onUpdateCard={handleUpdateCard}
                 onRemoveWidget={handleRemoveWidget}
               />
-            </div>
-
-            {showDashboard && dashboardLayout === "horizontal" && (
-              <div
-                onMouseDown={(event) => startResizing(event, "horizontal")}
-                className={cn(
-                  "absolute bottom-0 left-0 z-20 h-2 w-full cursor-row-resize bg-gradient-to-r from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
-                  isResizing === "horizontal" ? "opacity-100" : "opacity-0 hover:opacity-100"
-                )}
-                style={{ bottom: -4 }}
-              />
-            )}
-          </div>
-
-          <div className="relative flex min-h-0 flex-1">
-            <div
-              className={cn(
-                "relative flex-shrink-0 overflow-hidden bg-navBackground",
-                isResizing === "vertical" ? "" : "transition-all duration-500 ease-in-out",
-                showDashboard && dashboardLayout === "vertical"
-                  ? "border-r border-cardStroke opacity-100"
-                  : "border-transparent opacity-0"
-              )}
-              style={{ width: showDashboard && dashboardLayout === "vertical" ? dashWidth : 0 }}
-            >
-              <div className="absolute inset-y-0 left-0" style={{ width: dashWidth }}>
-                <DashboardCanva
-                  layout="vertical"
-                  cards={widgetCards}
-                  onUpdateCard={handleUpdateCard}
-                  onRemoveWidget={handleRemoveWidget}
-                />
-              </div>
-
-              {showDashboard && dashboardLayout === "vertical" && (
-                <div
-                  onMouseDown={(event) => startResizing(event, "vertical")}
-                  className={cn(
-                    "absolute right-0 top-0 z-20 h-full w-2 cursor-col-resize bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
-                    isResizing === "vertical" ? "opacity-100" : "opacity-0 hover:opacity-100"
-                  )}
-                  style={{ right: -4 }}
-                />
-              )}
-            </div>
+            </DashboardDock>
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
               <PortalChatSession
@@ -1461,25 +1469,20 @@ export function PortalContainer() {
               />
             </div>
           </div>
-        </div>
+        </PortalPanel>
 
         {showRightPanel && (
-          <div
+          <PortalPanel
             className={cn(
-              "relative flex flex-shrink-0 flex-col overflow-hidden border-l border-cardStroke bg-navBackground",
+              "flex-shrink-0 border-l border-cardStroke",
               isResizing === "right" ? "" : "transition-all duration-500 ease-in-out"
             )}
             style={{ width: rightWidth }}
           >
-            <div
+            <PortalResizeHandle
               onMouseDown={(event) => startResizing(event, "right")}
-              className={cn(
-                "absolute left-0 top-0 z-20 h-full w-4 -translate-x-1/2 cursor-col-resize transition-all duration-200 ease-linear",
-                "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-cardStroke",
-                "hover:after:bg-hAccent",
-                isResizing === "right" ? "after:bg-hAccent" : ""
-              )}
-              style={{ left: -4 }}
+              active={isResizing === "right"}
+              variant="edge"
             />
 
             <CatalogPanel
@@ -1490,7 +1493,7 @@ export function PortalContainer() {
               onToggleCollapse={toggleRightCollapse}
               onActivityClick={handleActivityClick}
             />
-          </div>
+          </PortalPanel>
         )}
 
         <WidgetSettingsDialog
@@ -1501,7 +1504,7 @@ export function PortalContainer() {
           suggestedWidgetId={null}
           onDismissSuggestion={() => {}}
         />
-      </div>
+      </PortalShell>
     </SidebarProvider>
   );
 }
