@@ -3,6 +3,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Send, Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
+import {
+  getSuggestedActionsFromMessage,
+  getTextFromMessage,
+  getWarningsFromMessage,
+} from "@/lib/ai/message-utils";
 
 const STARTER_SUGGESTIONS = [
   {
@@ -35,6 +40,8 @@ export function ChatbotUI({
   messages,
   onSendMessage,
   isCentered,
+  status,
+  errorMessage,
 }) {
   const [inputValue, setInputValue] = useState("");
   const messagesEndRef = useRef(null);
@@ -62,6 +69,7 @@ export function ChatbotUI({
   };
 
   const isEmpty = messages.length === 0;
+  const isBusy = status === "submitted" || status === "streaming";
 
   return (
     <div
@@ -85,69 +93,63 @@ export function ChatbotUI({
           {!isEmpty && (
             <div className="flex flex-col space-y-6">
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={cn(
-                    "flex w-full animate-in fade-in slide-in-from-bottom-4 duration-500",
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "max-w-[82%] rounded-2xl p-4",
-                      message.role === "user"
-                        ? "bg-hAccent text-white-black"
-                        : "border border-secondaryCardStroke bg-secondaryCardBackground text-title"
-                    )}
-                  >
-                    <div
-                      className="text-sm leading-relaxed [&>p]:mt-2 first:[&>p]:mt-0"
-                      dangerouslySetInnerHTML={{ __html: renderRichText(message.content) }}
-                    />
-                    {(message.followUpQuestions?.length > 0 ||
-                      message.suggestedActions?.length > 0) && (
-                      <div className="mt-3 border-t border-secondaryCardStroke/60 pt-3">
-                        {message.followUpQuestions?.length > 0 && (
-                          <div>
-                            <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.18em] text-subtitle">
-                              Perguntas opcionais
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {message.followUpQuestions.map((question) => (
-                                <button
-                                  key={question}
-                                  onClick={() => onSendMessage?.(question)}
-                                  className="rounded-full border border-secondaryCardStroke bg-cardBackground px-3 py-1.5 text-sm font-medium text-subtitle transition-colors hover:border-hAccent hover:bg-cardBackgroundHover hover:text-title"
-                                >
-                                  {question}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
+                (() => {
+                  const messageText = getTextFromMessage(message);
+                  const suggestions = getSuggestedActionsFromMessage(message);
+                  const warnings = getWarningsFromMessage(message);
 
-                        {message.suggestedActions?.length > 0 && (
-                          <div className={cn(message.followUpQuestions?.length > 0 && "mt-3")}>
-                            <p className="mb-2 text-2xs font-semibold uppercase tracking-[0.18em] text-subtitle">
-                              Ações sugeridas
-                            </p>
-                            <div className="flex flex-wrap gap-2">
-                              {message.suggestedActions.map((action) => (
-                                <button
-                                  key={action.label}
-                                  onClick={() => onSendMessage?.(action.message)}
-                                  className="rounded-full border border-secondaryCardStroke bg-cardBackground px-3 py-1.5 text-sm font-medium text-title transition-colors hover:border-hAccent hover:bg-cardBackgroundHover"
-                                >
-                                  {action.label}
-                                </button>
-                              ))}
+                  return (
+                    <div
+                      key={message.id}
+                      className={cn(
+                        "flex w-full animate-in fade-in slide-in-from-bottom-4 duration-500",
+                        message.role === "user" ? "justify-end" : "justify-start"
+                      )}
+                    >
+                      <div className="max-w-[82%]">
+                        <div
+                          className={cn(
+                            "rounded-2xl p-4",
+                            message.role === "user"
+                              ? "bg-hAccent text-white-black"
+                              : "border border-secondaryCardStroke bg-secondaryCardBackground text-title"
+                          )}
+                        >
+                          <div
+                            className="text-sm leading-relaxed [&>p]:mt-2 first:[&>p]:mt-0"
+                            dangerouslySetInnerHTML={{ __html: renderRichText(messageText) }}
+                          />
+                          {warnings.length > 0 && (
+                            <div className="mt-3 rounded-xl border border-hAccent/20 bg-hAccent/10 px-3 py-2 text-xs text-title">
+                              {warnings.map((warning) => warning.message).join(" ")}
                             </div>
+                          )}
+                        </div>
+
+                        {message.role === "assistant" && suggestions.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-2 px-1">
+                            {suggestions.map((suggestion, index) => (
+                              <button
+                                key={`${message.id}-${suggestion.message}-${index}`}
+                                onClick={() => onSendMessage?.(suggestion.message)}
+                                style={{
+                                  borderWidth: "2px",
+                                  borderStyle: suggestion.kind === "question" ? "dotted" : "solid",
+                                  borderColor: "var(--color-cardStroke)",
+                                }}
+                                className={cn(
+                                  "rounded-full bg-cardBackground px-3 py-1.5 text-sm font-medium text-title transition-colors hover:bg-cardBackgroundHover"
+                                )}
+                              >
+                                {suggestion.label}
+                              </button>
+                            ))}
                           </div>
                         )}
                       </div>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  );
+                })()
               ))}
             </div>
           )}
@@ -173,7 +175,7 @@ export function ChatbotUI({
               Movimentador
             </p>
             <h1 className="text-3xl font-primary text-title md:text-4xl">
-              O que mais parece com o seu dia hoje?
+              Qual é o seu próximo passo?
             </h1>
           </div>
 
@@ -181,7 +183,7 @@ export function ChatbotUI({
             <textarea
               ref={textareaRef}
               className="max-h-32 flex-1 resize-none bg-transparent py-2 pr-2 text-title outline-none placeholder:text-subtitle/60"
-              placeholder="Conte o que você está sentindo ou escolha um atalho abaixo..."
+              placeholder="Conte o quão fisicamente ativo você esteve hoje ou qual o seu objetivo"
               value={inputValue}
               onChange={(event) => {
                 setInputValue(event.target.value);
@@ -193,12 +195,18 @@ export function ChatbotUI({
             />
             <button
               onClick={handleSend}
-              disabled={!inputValue.trim()}
+              disabled={!inputValue.trim() || isBusy}
               className="flex-shrink-0 rounded-lg bg-hAccent p-2 text-white-black transition-opacity hover:bg-hAccent/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <Send size={18} />
             </button>
           </div>
+
+          {(errorMessage || (isBusy && !isEmpty)) && (
+            <p className="mt-3 text-sm text-subtitle">
+              {errorMessage || "Gerando sua próxima resposta..."}
+            </p>
+          )}
 
           <div
             className={cn(

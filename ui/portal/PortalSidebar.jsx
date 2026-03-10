@@ -7,6 +7,7 @@ import {
   LogOut,
   PanelLeftClose,
   PanelLeftOpen,
+  Plus,
   Settings,
   User,
   Wrench,
@@ -27,6 +28,7 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupAction,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarHeader,
@@ -179,6 +181,7 @@ export function PortalSidebar({
   conversations = [],
   activeConversationId,
   onSelectConversation,
+  onNewConversation,
   onToggleCollapse,
   onResizeStart,
 }) {
@@ -266,6 +269,14 @@ export function PortalSidebar({
           <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-subtitle">
             Conversas
           </SidebarGroupLabel>
+          <SidebarGroupAction
+            aria-label="Nova conversa"
+            title="Nova conversa"
+            onClick={() => onNewConversation?.()}
+            className="text-icons hover:bg-cardBackgroundHover hover:text-hAccent"
+          >
+            <Plus className="size-4" />
+          </SidebarGroupAction>
 
           {conversationsOpen && (
             <SidebarGroupContent>
