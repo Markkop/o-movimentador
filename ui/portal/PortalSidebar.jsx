@@ -1,16 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ChevronsUpDown,
   MessageSquareText,
+  LogOut,
   PanelLeftClose,
   PanelLeftOpen,
-  Plus,
   Settings,
   User,
+  Wrench,
   Users,
-  LogOut,
 } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Avatar, AvatarFallback } from "../components/ui/avatar";
@@ -35,7 +35,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  SidebarSeparator,
   useSidebar,
 } from "../components/ui/sidebar";
 import { MOCK_USER } from "./mockPortalData";
@@ -176,12 +175,50 @@ export function PortalSidebar({
   teams = [],
   activeTeamId,
   onTeamChange,
+  equipmentItems = [],
   conversations = [],
   activeConversationId,
   onSelectConversation,
-  onNewConversation,
+  onToggleCollapse,
+  onResizeStart,
 }) {
   const [conversationsOpen] = useState(true);
+  const suppressRailClickRef = useRef(false);
+
+  const handleRailMouseDown = (event) => {
+    suppressRailClickRef.current = false;
+
+    const initialX = event.clientX;
+    const initialY = event.clientY;
+
+    const handlePointerMove = (moveEvent) => {
+      if (
+        Math.abs(moveEvent.clientX - initialX) > 3 ||
+        Math.abs(moveEvent.clientY - initialY) > 3
+      ) {
+        suppressRailClickRef.current = true;
+      }
+    };
+
+    const handlePointerUp = () => {
+      window.removeEventListener("mousemove", handlePointerMove);
+      window.removeEventListener("mouseup", handlePointerUp);
+    };
+
+    window.addEventListener("mousemove", handlePointerMove);
+    window.addEventListener("mouseup", handlePointerUp);
+    onResizeStart?.(event);
+  };
+
+  const handleRailClick = (event) => {
+    if (suppressRailClickRef.current) {
+      event.preventDefault();
+      suppressRailClickRef.current = false;
+      return;
+    }
+
+    onToggleCollapse?.();
+  };
 
   return (
     <Sidebar
@@ -201,22 +238,35 @@ export function PortalSidebar({
         </div>
       </SidebarHeader>
 
-      <SidebarSeparator className="!bg-cardStroke" />
-
       <SidebarContent>
+        {equipmentItems.length > 0 && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-subtitle">
+              Equipamentos
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {equipmentItems.map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      tooltip={item.label}
+                      className="!h-auto gap-2 py-1.5 text-bodyPrimary hover:bg-cardBackgroundHover hover:text-title"
+                    >
+                      <Wrench className="size-4 shrink-0" />
+                      <span className="truncate text-sm">{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs font-semibold uppercase tracking-wider text-subtitle">
-            <div className="flex w-full items-center gap-2">
-              <span>Conversas</span>
-              <button
-                onClick={() => onNewConversation?.()}
-                title="Nova conversa"
-                className="ml-auto flex size-5 items-center justify-center rounded-md text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-              >
-                <Plus className="size-4" />
-              </button>
-            </div>
+            Conversas
           </SidebarGroupLabel>
+
           {conversationsOpen && (
             <SidebarGroupContent>
               <SidebarMenu>
@@ -231,25 +281,13 @@ export function PortalSidebar({
                         tooltip={conversation.title}
                         onClick={() => onSelectConversation?.(conversation.id)}
                         className={cn(
-                          "!h-auto items-start gap-2 py-2 text-bodyPrimary hover:bg-cardBackgroundHover hover:text-title",
+                          "!h-auto gap-2 py-2 text-bodyPrimary hover:bg-cardBackgroundHover hover:text-title",
                           conversation.id === activeConversationId &&
                             "bg-cardBackgroundHover text-title"
                         )}
                       >
-                        <MessageSquareText className="mt-0.5 size-4 shrink-0" />
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="truncate text-sm font-medium">
-                              {conversation.title}
-                            </span>
-                            <span className="shrink-0 text-2xs text-subtitle">
-                              {conversation.updatedLabel}
-                            </span>
-                          </div>
-                          <p className="truncate text-2xs text-subtitle">
-                            {conversation.preview}
-                          </p>
-                        </div>
+                        <MessageSquareText className="size-4 shrink-0" />
+                        <span className="truncate text-sm font-medium">{conversation.title}</span>
                       </SidebarMenuButton>
                       {conversation.unread > 0 && (
                         <SidebarMenuBadge className="text-2xs text-hAccent">
@@ -269,7 +307,7 @@ export function PortalSidebar({
         <UserFooter />
       </SidebarFooter>
 
-      <SidebarRail />
+      <SidebarRail onMouseDown={handleRailMouseDown} onClick={handleRailClick} />
     </Sidebar>
   );
 }

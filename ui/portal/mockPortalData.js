@@ -10,6 +10,12 @@ export const MOCK_USER = {
   avatar: null,
 };
 
+export const MOCK_EQUIPMENT_BY_TEAM = {
+  "team-1": [],
+  "team-2": [],
+  "team-3": [],
+};
+
 export const MOCK_CONVERSATIONS = [
   {
     id: "conv-1",

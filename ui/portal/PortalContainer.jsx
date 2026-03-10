@@ -13,6 +13,7 @@ import { LayoutGrid, Moon, Settings, Sun } from "lucide-react";
 import { useTheme } from "../components/ThemeProvider";
 import {
   MOCK_CONVERSATIONS,
+  MOCK_EQUIPMENT_BY_TEAM,
   MOCK_HABITS,
   MOCK_MESSAGES_BY_CONVERSATION,
   MOCK_TASKS,
@@ -28,6 +29,38 @@ const ONBOARDING_CONVERSATION = {
   updatedLabel: "Agora",
   unread: 0,
 };
+
+const LEFT_PANEL_DEFAULT_WIDTH = 264;
+const LEFT_PANEL_MIN_WIDTH = 232;
+const LEFT_PANEL_MAX_WIDTH = 360;
+const LEFT_PANEL_COLLAPSED_WIDTH = 56;
+const LEFT_PANEL_COLLAPSE_THRESHOLD = 180;
+
+const RIGHT_PANEL_DEFAULT_WIDTH = 360;
+const RIGHT_PANEL_MIN_WIDTH = 240;
+const RIGHT_PANEL_MAX_WIDTH = 520;
+const RIGHT_PANEL_COLLAPSED_WIDTH = 72;
+const RIGHT_PANEL_COLLAPSE_THRESHOLD = 160;
+
+const EQUIPMENT_LIBRARY = [
+  { id: "treadmill", label: "Esteira", terms: ["esteira"] },
+  {
+    id: "standing-desk",
+    label: "Mesa com altura regulável",
+    terms: ["mesa com altura regulavel", "mesa regulavel", "standing desk"],
+  },
+  {
+    id: "gym-membership",
+    label: "Assinatura de academia",
+    terms: ["assinatura de academia", "plano de academia"],
+  },
+  { id: "hand-grip", label: "Hand Grip", terms: ["hand grip", "handgrip"] },
+  {
+    id: "stress-ball",
+    label: "Bolinha de apertar",
+    terms: ["bolinha de apertar", "bolinha anti stress", "bolinha antiestresse"],
+  },
+];
 
 function normalizeMessage(value = "") {
   return value
@@ -53,6 +86,40 @@ function buildConversationTitle(message) {
   }
 
   return message.length > 34 ? `${message.slice(0, 31)}...` : message;
+}
+
+function extractMentionedEquipment(message) {
+  const normalized = normalizeMessage(message);
+
+  return EQUIPMENT_LIBRARY.filter((item) =>
+    item.terms.some((term) => normalized.includes(term))
+  ).map(({ id, label }) => ({ id, label }));
+}
+
+function mergeEquipment(existingItems = [], incomingItems = []) {
+  const seenIds = new Set(existingItems.map((item) => item.id));
+  const nextItems = [...existingItems];
+
+  incomingItems.forEach((item) => {
+    if (seenIds.has(item.id)) return;
+    seenIds.add(item.id);
+    nextItems.push(item);
+  });
+
+  return nextItems;
+}
+
+function appendEquipmentNote(reply, equipmentItems = []) {
+  if (equipmentItems.length === 0) {
+    return reply;
+  }
+
+  const equipmentList = equipmentItems.map((item) => item.label).join(", ");
+
+  return {
+    ...reply,
+    content: `${reply.content}\n\nTambém registrei em **Equipamentos**: ${equipmentList}.`,
+  };
 }
 
 function buildCoachReply(content, context = {}) {
@@ -845,18 +912,20 @@ export function PortalContainer() {
     [ONBOARDING_CONVERSATION.id]: [],
     ...MOCK_MESSAGES_BY_CONVERSATION,
   }));
+  const [equipmentByTeam, setEquipmentByTeam] = useState(MOCK_EQUIPMENT_BY_TEAM);
   const [habits, setHabits] = useState(MOCK_HABITS);
   const [tasks, setTasks] = useState(MOCK_TASKS);
   const [upcomingActivities, setUpcomingActivities] = useState(MOCK_UPCOMING_ACTIVITIES);
   const [activeConversationId, setActiveConversationId] = useState(ONBOARDING_CONVERSATION.id);
-  const [hasSeenFirstAssistantResponse, setHasSeenFirstAssistantResponse] = useState(false);
   const [hasCreatedFirstItem, setHasCreatedFirstItem] = useState(false);
 
+  const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
+  const [leftWidth, setLeftWidth] = useState(LEFT_PANEL_DEFAULT_WIDTH);
   const [isRightCollapsed, setIsRightCollapsed] = useState(false);
-  const [rightWidth, setRightWidth] = useState(360);
+  const [rightWidth, setRightWidth] = useState(RIGHT_PANEL_DEFAULT_WIDTH);
   const [dashboardMode, setDashboardMode] = useState("hidden");
   const [dashHeight, setDashHeight] = useState(180);
-  const [dashWidth, setDashWidth] = useState(360);
+  const [dashWidth, setDashWidth] = useState(RIGHT_PANEL_DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
 
   const [activeWidgetIds, setActiveWidgetIds] = useState(getDefaultWidgets());
@@ -866,6 +935,8 @@ export function PortalContainer() {
   const [settingsOpen, setSettingsOpen] = useState(false);
 
   const isResizingRef = useRef(false);
+  const leftExpandedWidthRef = useRef(LEFT_PANEL_DEFAULT_WIDTH);
+  const rightExpandedWidthRef = useRef(RIGHT_PANEL_DEFAULT_WIDTH);
 
   const visibleConversations = conversations.filter(
     (conversation) => conversation.teamId === activeTeamId
@@ -884,6 +955,7 @@ export function PortalContainer() {
   const messages = activeConversation
     ? messagesByConversation[activeConversation.id] ?? []
     : [];
+  const teamEquipment = equipmentByTeam[activeTeamId] ?? [];
   const teamHabits = habits.filter((habit) => habit.teamId === activeTeamId);
   const teamTasks = tasks.filter((task) => task.teamId === activeTeamId);
   const teamActivities = upcomingActivities.filter((activity) => activity.teamId === activeTeamId);
@@ -944,8 +1016,43 @@ export function PortalContainer() {
     );
   };
 
+  const createConversation = ({
+    title = "Nova conversa",
+    preview = "Conte como está sua rotina hoje.",
+    assistantContent = "Me conta como está seu dia e eu monto o próximo passo sem te encher de perguntas.",
+  } = {}) => {
+    const id = `conv-${Date.now()}`;
+    const newConversation = {
+      id,
+      teamId: activeTeamId,
+      title,
+      preview,
+      updatedLabel: "Agora",
+      unread: 0,
+    };
+
+    setConversations((previous) => [newConversation, ...previous]);
+    setMessagesByConversation((previous) => ({
+      ...previous,
+      [id]: [
+        {
+          id: `welcome-${Date.now()}`,
+          role: "assistant",
+          content: assistantContent,
+        },
+      ],
+    }));
+    setActiveConversationId(id);
+  };
+
   const handleSendMessage = (content) => {
     if (!activeConversation) return;
+
+    const mentionedEquipment = extractMentionedEquipment(content);
+    const existingEquipmentIds = new Set(teamEquipment.map((item) => item.id));
+    const newlyMentionedEquipment = mentionedEquipment.filter(
+      (item) => !existingEquipmentIds.has(item.id)
+    );
 
     const userMessage = {
       id: Date.now(),
@@ -959,13 +1066,23 @@ export function PortalContainer() {
     }));
     updateConversationFromUserMessage(activeConversation.id, content);
 
+    if (newlyMentionedEquipment.length > 0) {
+      setEquipmentByTeam((previous) => ({
+        ...previous,
+        [activeTeamId]: mergeEquipment(previous[activeTeamId] ?? [], newlyMentionedEquipment),
+      }));
+    }
+
     setTimeout(() => {
-      const reply = buildCoachReply(content, {
-        teamHabits,
-        teamTasks,
-        teamActivities,
-        challengeTarget: "15 min",
-      });
+      const reply = appendEquipmentNote(
+        buildCoachReply(content, {
+          teamHabits,
+          teamTasks,
+          teamActivities,
+          challengeTarget: "15 min",
+        }),
+        newlyMentionedEquipment
+      );
       const assistantMessage = {
         id: Date.now() + 1,
         role: "assistant",
@@ -978,7 +1095,6 @@ export function PortalContainer() {
         ...previous,
         [activeConversation.id]: [...(previous[activeConversation.id] ?? []), assistantMessage],
       }));
-      setHasSeenFirstAssistantResponse(true);
       updateConversationPreview(activeConversation.id, reply.content.replace(/\n/g, " "));
 
       const followUp = createFollowUpItem({
@@ -999,7 +1115,7 @@ export function PortalContainer() {
       if (followUp?.habit || followUp?.task) {
         setHasCreatedFirstItem(true);
         setIsRightCollapsed(false);
-        setRightWidth(360);
+        setRightWidth(rightExpandedWidthRef.current);
       }
     }, 700);
   };
@@ -1030,29 +1146,7 @@ export function PortalContainer() {
   };
 
   const handleNewConversation = () => {
-    const id = `conv-${Date.now()}`;
-    const newConversation = {
-      id,
-      teamId: activeTeamId,
-      title: "Nova conversa",
-      preview: "Conte como está sua rotina hoje.",
-      updatedLabel: "Agora",
-      unread: 0,
-    };
-
-    setConversations((previous) => [newConversation, ...previous]);
-    setMessagesByConversation((previous) => ({
-      ...previous,
-      [id]: [
-        {
-          id: `welcome-${Date.now()}`,
-          role: "assistant",
-          content:
-            "Me conta como está seu dia e eu monto o próximo passo sem te encher de perguntas.",
-        },
-      ],
-    }));
-    setActiveConversationId(id);
+    createConversation();
   };
 
   const startResizing = (event, target) => {
@@ -1061,7 +1155,13 @@ export function PortalContainer() {
     setIsResizing(target);
     const startPos = target === "horizontal" ? event.clientY : event.clientX;
     const startSize =
-      target === "horizontal" ? dashHeight : target === "vertical" ? dashWidth : rightWidth;
+      target === "horizontal"
+        ? dashHeight
+        : target === "vertical"
+          ? dashWidth
+          : target === "left"
+            ? leftWidth
+            : rightWidth;
 
     const onMouseMove = (moveEvent) => {
       if (!isResizingRef.current) return;
@@ -1073,15 +1173,37 @@ export function PortalContainer() {
       } else if (target === "vertical") {
         const delta = currentPos - startPos;
         setDashWidth(Math.max(240, startSize + delta));
+      } else if (target === "left") {
+        const delta = currentPos - startPos;
+        const rawNextSize = Math.min(
+          LEFT_PANEL_MAX_WIDTH,
+          Math.max(LEFT_PANEL_COLLAPSED_WIDTH, startSize + delta)
+        );
+
+        if (rawNextSize <= LEFT_PANEL_COLLAPSE_THRESHOLD) {
+          setIsLeftCollapsed(true);
+          setLeftWidth(LEFT_PANEL_COLLAPSED_WIDTH);
+        } else {
+          const expandedSize = Math.max(LEFT_PANEL_MIN_WIDTH, rawNextSize);
+          leftExpandedWidthRef.current = expandedSize;
+          setIsLeftCollapsed(false);
+          setLeftWidth(expandedSize);
+        }
       } else {
         const delta = startPos - currentPos;
-        const nextSize = Math.max(72, startSize + delta);
-        if (nextSize < 160) {
+        const rawNextSize = Math.min(
+          RIGHT_PANEL_MAX_WIDTH,
+          Math.max(RIGHT_PANEL_COLLAPSED_WIDTH, startSize + delta)
+        );
+
+        if (rawNextSize <= RIGHT_PANEL_COLLAPSE_THRESHOLD) {
           setIsRightCollapsed(true);
-          setRightWidth(72);
+          setRightWidth(RIGHT_PANEL_COLLAPSED_WIDTH);
         } else {
+          const expandedSize = Math.max(RIGHT_PANEL_MIN_WIDTH, rawNextSize);
+          rightExpandedWidthRef.current = expandedSize;
           setIsRightCollapsed(false);
-          setRightWidth(nextSize);
+          setRightWidth(expandedSize);
         }
       }
     };
@@ -1099,18 +1221,31 @@ export function PortalContainer() {
     document.body.style.cursor = target === "horizontal" ? "row-resize" : "col-resize";
   };
 
-  const toggleRightCollapse = () => {
-    setIsRightCollapsed((previous) => {
+  const toggleLeftCollapse = () => {
+    setIsLeftCollapsed((previous) => {
       if (!previous) {
-        setRightWidth(72);
+        setLeftWidth(LEFT_PANEL_COLLAPSED_WIDTH);
         return true;
       }
-      setRightWidth(360);
+
+      setLeftWidth(leftExpandedWidthRef.current);
       return false;
     });
   };
 
-  const showConversationSidebar = hasSeenFirstAssistantResponse;
+  const toggleRightCollapse = () => {
+    setIsRightCollapsed((previous) => {
+      if (!previous) {
+        setRightWidth(RIGHT_PANEL_COLLAPSED_WIDTH);
+        return true;
+      }
+
+      setRightWidth(rightExpandedWidthRef.current);
+      return false;
+    });
+  };
+
+  const showConversationSidebar = true;
   const showRightPanel = hasCreatedFirstItem;
   const showDashboard = showConversationSidebar && dashboardMode !== "hidden";
   const dashboardLayout = showDashboard ? dashboardMode : "horizontal";
@@ -1127,9 +1262,16 @@ export function PortalContainer() {
 
   return (
     <SidebarProvider
-      defaultOpen={true}
+      open={!isLeftCollapsed}
+      onOpenChange={(open) => {
+        setIsLeftCollapsed(!open);
+        setLeftWidth(open ? leftExpandedWidthRef.current : LEFT_PANEL_COLLAPSED_WIDTH);
+      }}
       className="!min-h-0 h-full"
-      style={{ "--sidebar-width": "18rem", "--sidebar-width-icon": "3rem" }}
+      style={{
+        "--sidebar-width": `${leftWidth}px`,
+        "--sidebar-width-icon": `${LEFT_PANEL_COLLAPSED_WIDTH}px`,
+      }}
     >
       <div className="flex h-full w-full font-secondary text-bodyPrimary">
         {showConversationSidebar && (
@@ -1137,10 +1279,13 @@ export function PortalContainer() {
             teams={MOCK_TEAMS}
             activeTeamId={activeTeamId}
             onTeamChange={setActiveTeamId}
+            equipmentItems={teamEquipment}
             conversations={visibleConversations}
             activeConversationId={activeConversationId}
             onSelectConversation={setActiveConversationId}
             onNewConversation={handleNewConversation}
+            onToggleCollapse={toggleLeftCollapse}
+            onResizeStart={(event) => startResizing(event, "left")}
           />
         )}
 
@@ -1255,8 +1400,10 @@ export function PortalContainer() {
             <div
               onMouseDown={(event) => startResizing(event, "right")}
               className={cn(
-                "absolute left-0 top-0 z-20 h-full w-2 cursor-col-resize bg-gradient-to-b from-transparent via-secondaryCardStroke/50 to-transparent transition-opacity duration-300",
-                isResizing === "right" ? "opacity-100" : "opacity-0 hover:opacity-100"
+                "absolute left-0 top-0 z-20 h-full w-4 -translate-x-1/2 cursor-col-resize transition-all duration-200 ease-linear",
+                "after:absolute after:inset-y-0 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-cardStroke",
+                "hover:after:bg-hAccent",
+                isResizing === "right" ? "after:bg-hAccent" : ""
               )}
               style={{ left: -4 }}
             />
