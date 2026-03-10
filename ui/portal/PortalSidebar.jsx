@@ -186,8 +186,15 @@ export function PortalSidebar({
   onToggleCollapse,
   onResizeStart,
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
   const [conversationsOpen] = useState(true);
   const suppressRailClickRef = useRef(false);
+
+  const closeMobileSidebar = () => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   const handleRailMouseDown = (event) => {
     suppressRailClickRef.current = false;
@@ -227,6 +234,8 @@ export function PortalSidebar({
   return (
     <Sidebar
       collapsible="icon"
+      mobileWidth="66vw"
+      mobileClassName="border-r border-cardStroke bg-navBackground text-bodyPrimary"
       className="!relative !inset-auto !h-full !border-r-cardStroke [&_[data-sidebar=sidebar]]:bg-navBackground"
     >
       <SidebarHeader className="gap-0">
@@ -273,7 +282,10 @@ export function PortalSidebar({
           <SidebarGroupAction
             aria-label="Nova conversa"
             title="Nova conversa"
-            onClick={() => onNewConversation?.()}
+            onClick={() => {
+              onNewConversation?.();
+              closeMobileSidebar();
+            }}
             className="text-icons hover:bg-cardBackgroundHover hover:text-hAccent"
           >
             <Plus className="size-4" />
@@ -291,7 +303,10 @@ export function PortalSidebar({
                     <SidebarMenuItem key={conversation.id}>
                       <SidebarMenuButton
                         tooltip={conversation.title}
-                        onClick={() => onSelectConversation?.(conversation.id)}
+                        onClick={() => {
+                          onSelectConversation?.(conversation.id);
+                          closeMobileSidebar();
+                        }}
                         className={cn(
                           "!h-auto gap-2 py-2 text-bodyPrimary hover:bg-cardBackgroundHover hover:text-title",
                           conversation.id === activeConversationId &&

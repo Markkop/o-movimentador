@@ -12,11 +12,13 @@ import {
 import { PortalChatSession } from "./PortalChatSession";
 import { WidgetSettingsDialog } from "./widgets/WidgetSettingsDialog";
 import { PortalSidebar } from "./PortalSidebar";
-import { SidebarProvider } from "../components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "../components/ui/sidebar";
 import { computeWidgetPositions, getDefaultWidgets } from "./widgets/widgetRegistry";
 import { cn } from "../lib/utils";
-import { LayoutGrid, Moon, Palette, Settings, Sun } from "lucide-react";
+import { LayoutGrid, Moon, Palette, PanelRightOpen, Settings, Sun } from "lucide-react";
 import { useTheme } from "../components/ThemeProvider";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../components/ui/sheet";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   convertLegacyMessage,
   createAssistantMessage,
@@ -966,6 +968,7 @@ function DashboardDock({ active, axis, children, onResizeStart, size, visible })
 
 export function PortalContainer() {
   const { theme, toggleTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   const [activeTeamId, setActiveTeamId] = useState(MOCK_TEAMS[0].id);
   const [conversations, setConversations] = useState(() => [
@@ -990,6 +993,7 @@ export function PortalContainer() {
   const [dashHeight, setDashHeight] = useState(180);
   const [dashWidth, setDashWidth] = useState(RIGHT_PANEL_DEFAULT_WIDTH);
   const [isResizing, setIsResizing] = useState(false);
+  const [isMobileRightPanelOpen, setIsMobileRightPanelOpen] = useState(false);
 
   const [activeWidgetIds, setActiveWidgetIds] = useState(getDefaultWidgets());
   const [widgetCards, setWidgetCards] = useState(() =>
@@ -1337,9 +1341,18 @@ export function PortalContainer() {
   const showConversationSidebar = true;
   const showRightPanel = hasCreatedFirstItem;
   const showDashboard = showConversationSidebar && dashboardMode !== "hidden";
-  const dashboardLayout = showDashboard ? dashboardMode : "horizontal";
+  const dashboardLayout = showDashboard
+    ? isMobile && dashboardMode === "vertical"
+      ? "horizontal"
+      : dashboardMode
+    : "horizontal";
 
   const handleToggleDashboard = () => {
+    if (isMobile) {
+      setDashboardMode((previous) => (previous === "hidden" ? "horizontal" : "hidden"));
+      return;
+    }
+
     if (showDashboard && dashboardLayout === "horizontal") {
       setDashboardMode("vertical");
     } else if (showDashboard && dashboardLayout === "vertical") {
@@ -1348,6 +1361,50 @@ export function PortalContainer() {
       setDashboardMode("horizontal");
     }
   };
+
+  useEffect(() => {
+    if (!showRightPanel || !isMobile) {
+      setIsMobileRightPanelOpen(false);
+    }
+  }, [isMobile, showRightPanel]);
+
+  const utilityButtons = (
+    <>
+      <button
+        onClick={toggleAiMode}
+        className={cn(
+          "rounded-md p-1.5 transition-colors",
+          aiMode === "mock"
+            ? "bg-hAccent/15 text-hAccent hover:bg-hAccent/20"
+            : "text-icons hover:bg-cardBackgroundHover hover:text-title"
+        )}
+        title={aiMode === "mock" ? "Modo mock ativo" : "Ativar modo mock"}
+      >
+        <Palette size={18} />
+      </button>
+      <button
+        onClick={toggleTheme}
+        className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+        title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
+      >
+        {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
+      </button>
+      <button
+        onClick={() => setSettingsOpen(true)}
+        className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+        title="Widgets do dashboard"
+      >
+        <Settings size={18} />
+      </button>
+      <button
+        onClick={handleToggleDashboard}
+        className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+        title="Alternar layout do dashboard"
+      >
+        <LayoutGrid size={18} />
+      </button>
+    </>
+  );
 
   return (
     <SidebarProvider
@@ -1380,40 +1437,43 @@ export function PortalContainer() {
 
         <PortalPanel className="min-w-[300px] flex-1">
           {showConversationSidebar && (
-            <PortalPanelHeader className="z-20 justify-end border-b-0 p-3">
-              <button
-                onClick={toggleAiMode}
-                className={cn(
-                  "rounded-md p-1.5 transition-colors",
-                  aiMode === "mock"
-                    ? "bg-hAccent/15 text-hAccent hover:bg-hAccent/20"
-                    : "text-icons hover:bg-cardBackgroundHover hover:text-title"
-                )}
-                title={aiMode === "mock" ? "Modo mock ativo" : "Ativar modo mock"}
-              >
-                <Palette size={18} />
-              </button>
-              <button
-                onClick={toggleTheme}
-                className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-                title={theme === "dark" ? "Trocar para tema claro" : "Trocar para tema escuro"}
-              >
-                {theme === "dark" ? <Moon size={18} /> : <Sun size={18} />}
-              </button>
-              <button
-                onClick={() => setSettingsOpen(true)}
-                className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-                title="Widgets do dashboard"
-              >
-                <Settings size={18} />
-              </button>
-              <button
-                onClick={handleToggleDashboard}
-                className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
-                title="Alternar layout do dashboard"
-              >
-                <LayoutGrid size={18} />
-              </button>
+            <PortalPanelHeader
+              className={cn(
+                "z-20 p-3",
+                isMobile ? "flex-col items-stretch border-b border-cardStroke" : "justify-end border-b-0"
+              )}
+            >
+              {isMobile ? (
+                <>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <SidebarTrigger className="rounded-md text-icons hover:bg-cardBackgroundHover hover:text-hAccent" />
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-title">Movimentador</p>
+                        <p className="truncate text-2xs text-subtitle">
+                          {activeConversation?.title ?? "Nova conversa"}
+                        </p>
+                      </div>
+                    </div>
+                    {showRightPanel && (
+                      <button
+                        onClick={() => setIsMobileRightPanelOpen(true)}
+                        className="rounded-md p-1.5 text-icons transition-colors hover:bg-cardBackgroundHover hover:text-hAccent"
+                        title="Abrir próximas atividades"
+                      >
+                        <PanelRightOpen size={18} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    {utilityButtons}
+                  </div>
+                </>
+              ) : (
+                <div className="flex items-center gap-2">
+                  {utilityButtons}
+                </div>
+              )}
             </PortalPanelHeader>
           )}
 
@@ -1471,7 +1531,7 @@ export function PortalContainer() {
           </div>
         </PortalPanel>
 
-        {showRightPanel && (
+        {showRightPanel && !isMobile && (
           <PortalPanel
             className={cn(
               "flex-shrink-0 border-l border-cardStroke",
@@ -1494,6 +1554,32 @@ export function PortalContainer() {
               onActivityClick={handleActivityClick}
             />
           </PortalPanel>
+        )}
+
+        {showRightPanel && isMobile && (
+          <Sheet open={isMobileRightPanelOpen} onOpenChange={setIsMobileRightPanelOpen}>
+            <SheetContent
+              side="right"
+              showCloseButton={false}
+              className="w-[66vw] max-w-none border-l border-cardStroke bg-navBackground p-0 text-bodyPrimary sm:max-w-none"
+            >
+              <SheetHeader className="sr-only">
+                <SheetTitle>Próximas atividades</SheetTitle>
+                <SheetDescription>Abre o painel lateral com hábitos, tarefas e insights.</SheetDescription>
+              </SheetHeader>
+              <CatalogPanel
+                activities={teamActivities}
+                habits={teamHabits}
+                tasks={teamTasks}
+                isCollapsed={false}
+                onToggleCollapse={() => setIsMobileRightPanelOpen(false)}
+                onActivityClick={(activity) => {
+                  setIsMobileRightPanelOpen(false);
+                  handleActivityClick(activity);
+                }}
+              />
+            </SheetContent>
+          </Sheet>
         )}
 
         <WidgetSettingsDialog

@@ -80,7 +80,7 @@ export function ChatbotUI({
     >
       <div
         className={cn(
-          "flex flex-1 flex-col overflow-y-auto bg-navBackground p-6 scrollbar-thin",
+          "flex flex-1 flex-col overflow-y-auto bg-navBackground p-4 md:p-6 scrollbar-thin",
           isEmpty && "hidden"
         )}
       >
@@ -106,7 +106,7 @@ export function ChatbotUI({
                         message.role === "user" ? "justify-end" : "justify-start"
                       )}
                     >
-                      <div className="max-w-[82%]">
+                      <div className="max-w-[90%] md:max-w-[82%]">
                         <div
                           className={cn(
                             "rounded-2xl p-4",
@@ -157,7 +157,7 @@ export function ChatbotUI({
         </div>
       </div>
 
-      <div className="flex-none bg-navBackground p-4">
+      <div className="flex-none bg-navBackground p-3 md:p-4">
         <div
           className={cn(
             "mx-auto w-full transition-all duration-500",
@@ -166,7 +166,7 @@ export function ChatbotUI({
         >
           <div
             className={cn(
-              "mb-8 overflow-hidden text-center transition-all duration-500",
+              "mb-6 overflow-hidden text-center transition-all duration-500 md:mb-8",
               isEmpty ? "max-h-40 opacity-100" : "max-h-0 opacity-0"
             )}
           >
@@ -174,7 +174,7 @@ export function ChatbotUI({
               <Sparkles size={14} />
               Movimentador
             </p>
-            <h1 className="text-3xl font-primary text-title md:text-4xl">
+            <h1 className="text-2xl font-primary text-title md:text-4xl">
               Qual é o seu próximo passo?
             </h1>
           </div>
@@ -210,7 +210,7 @@ export function ChatbotUI({
 
           <div
             className={cn(
-              "mt-6 flex flex-wrap justify-center gap-2 overflow-hidden transition-all duration-500",
+              "mt-5 flex flex-wrap justify-center gap-2 overflow-hidden transition-all duration-500 md:mt-6",
               isEmpty ? "max-h-32 opacity-100" : "max-h-0 opacity-0"
             )}
           >
